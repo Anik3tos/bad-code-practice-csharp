@@ -123,3 +123,8 @@ h1:focus {
 .memory-table td {
     vertical-align: middle;
 }
+
+.cache-metrics-table th,
+.cache-metrics-table td {
+    vertical-align: middle;
+}

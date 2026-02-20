@@ -2,36 +2,55 @@
 
 Practice project for finding bad code and refactoring it into cleaner, faster code.
 
-## EF Core challenge included
+## Included challenge labs
 
-The app ships with one complete scenario based on common EF Core mistakes.
+### EF Core challenge
+- Practice file: `BadCodePractice/Features/EfCoreChallenge/PracticeOrderReportService.cs`
+- Route: `/ef-core-challenge`
+- Focus: over-fetching, in-memory filtering, N+1 queries
+- Metrics: SQL command count, elapsed time, output rows
 
-1. Open `BadCodePractice/Features/EfCoreChallenge/PracticeOrderReportService.cs`.
-2. Identify the anti-patterns (over-fetching, in-memory filtering, N+1 queries).
-3. Refactor the method.
-4. Run the app and compare metrics on `/ef-core-challenge`.
+### Caching challenge
+- Practice file: `BadCodePractice/Features/CachingChallenge/PracticeCachingChallengeService.cs`
+- Route: `/caching-challenge`
+- Focus: unbounded cache growth, missing TTL/eviction, cache stampede
+- Metrics: memory retained, hit ratio, response time
 
-The challenge page shows:
+### Memory leak challenge
+- Practice file: `BadCodePractice/Features/MemoryLeakChallenge/PracticeMemoryLeakService.cs`
+- Route: `/memory-leak-challenge`
+- Focus: static references, event subscriptions, timers, unbounded collections, closure capture
+- Metrics: retained memory by cause and total retained memory
 
-- SQL command count
-- elapsed time
-- output rows
+### Async misuse challenge
+- Practice file: `BadCodePractice/Features/AsyncMisuseChallenge/PracticeAsyncMisuseService.cs`
+- Route: `/async-misuse-challenge`
+- Focus: sync-over-async, fire-and-forget, missing cancellation
+- Metrics: elapsed time, processed count, approximate worker thread usage
 
-## Memory leak challenge included
+### Concurrency challenge
+- Practice file: `BadCodePractice/Features/ConcurrencyChallenge/PracticeConcurrencyService.cs`
+- Route: `/concurrency-challenge`
+- Focus: race conditions and shared mutable state
+- Metrics: expected vs actual count, missed updates, elapsed time
 
-The app also includes a memory leak practice lab with common leak causes.
+### DI lifetime challenge
+- Practice file: `BadCodePractice/Features/DiLifetimeChallenge/PracticeDiLifetimeService.cs`
+- Route: `/di-lifetime-challenge`
+- Focus: captive dependencies, scope/state leakage, disposable lifetime mistakes
+- Metrics: unique scopes seen, leak indicator, memory growth, elapsed time
 
-1. Open `BadCodePractice/Features/MemoryLeakChallenge/PracticeMemoryLeakService.cs`.
-2. Refactor the practice methods to avoid leaked references.
-3. Run `/memory-leak-challenge` and compare retained memory.
+### Allocation challenge
+- Practice file: `BadCodePractice/Features/AllocationChallenge/PracticeAllocationService.cs`
+- Route: `/allocation-challenge`
+- Focus: heavy allocations in hot paths, boxing, string churn, LINQ overhead
+- Metrics: memory allocated (MB), Gen 0/1/2 collection counts, elapsed time
 
-The challenge includes common leak patterns:
-
-- static references that never get cleared
-- event handlers not unsubscribed
-- timers not disposed
-- unbounded caches
-- closures capturing large objects
+### Resiliency/Retry challenge
+- Practice file: `BadCodePractice/Features/ResiliencyRetryChallenge/PracticeResiliencyRetryService.cs`
+- Route: `/resiliency-retry-challenge`
+- Focus: blind retries, missing timeout/jitter/backoff, no circuit breaker
+- Metrics: success under fault injection, p95 tail latency, downstream call count
 
 ## Run with Docker DB (Postgres)
 
@@ -51,7 +70,7 @@ dotnet restore
 dotnet run
 ```
 
-Then open `https://localhost:xxxx/ef-core-challenge` or `https://localhost:xxxx/memory-leak-challenge` (port shown in console).
+Open any challenge route from the list above using the local URL printed by `dotnet run`.
 
 ## Optional: run with SQLite instead of Docker
 
@@ -62,8 +81,6 @@ dotnet run
 ```
 
 ## If app port is already in use
-
-If you see an error like `Failed to bind to address ... address already in use`, run with another URL:
 
 ```bash
 dotnet run --urls "http://localhost:5101"

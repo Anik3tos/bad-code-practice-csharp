@@ -1,0 +1,204 @@
+@page "/resiliency-retry-challenge"
+@rendermode InteractiveServer
+@using BadCodePractice.Features.ResiliencyRetryChallenge
+@inject ResiliencyRetryChallengeRunner Runner
+
+<PageTitle>Resiliency/Retry Challenge</PageTitle>
+
+<h1>Resiliency / Retry Challenge</h1>
+
+<p class="lead">
+    Start with <code>Features/ResiliencyRetryChallenge/PracticeResiliencyRetryService.cs</code>.
+    It intentionally starts with the same behavior as <code>BadResiliencyRetryService.cs</code>.
+</p>
+
+<section class="challenge-panel">
+    <div class="challenge-controls">
+        <label for="totalRequests">Total requests</label>
+        <input id="totalRequests" type="number" class="form-control" min="100" max="5000" @bind="_totalRequests" />
+
+        <label for="concurrency" class="mt-3">Concurrent workers</label>
+        <input id="concurrency" type="number" class="form-control" min="4" max="128" @bind="_concurrentWorkers" />
+
+        <label for="faultPercent" class="mt-3">Fault injection (%)</label>
+        <input id="faultPercent" type="number" class="form-control" min="0" max="95" @bind="_faultPercent" />
+
+        <label for="slowPercent" class="mt-3">Slow responses (%)</label>
+        <input id="slowPercent" type="number" class="form-control" min="0" max="95" @bind="_slowPercent" />
+
+        <label for="slowLatencyMs" class="mt-3">Slow latency (ms)</label>
+        <input id="slowLatencyMs" type="number" class="form-control" min="100" max="1500" @bind="_slowLatencyMs" />
+
+        <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
+            @_buttonText
+        </button>
+    </div>
+
+    <div class="challenge-smells">
+        <p class="mb-1 fw-semibold">What to fix in the bad implementation:</p>
+        <ul class="mb-0">
+            <li>Blind retries with no timeout</li>
+            <li>No jitter/backoff between attempts</li>
+            <li>No circuit breaker under downstream fault storms</li>
+        </ul>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger mt-3" role="alert">@_error</div>
+}
+
+@if (_result is not null)
+{
+    <section class="mt-4">
+        <h2>Run Results</h2>
+
+        <div class="challenge-grid">
+            <article class="challenge-card challenge-card-bad">
+                <h3>@_result.Bad.Label</h3>
+                <p><strong>Success:</strong> @FormatPercent(_result.Bad.SuccessRatePercent)</p>
+                <p><strong>Tail latency (p95):</strong> @FormatMilliseconds(_result.Bad.P95LatencyMilliseconds)</p>
+                <p><strong>Downstream calls:</strong> @_result.Bad.DownstreamCallCount.ToString("N0")</p>
+            </article>
+
+            <article class="challenge-card challenge-card-practice">
+                <h3>@_result.Practice.Label</h3>
+                <p><strong>Success:</strong> @FormatPercent(_result.Practice.SuccessRatePercent)</p>
+                <p><strong>Tail latency (p95):</strong> @FormatMilliseconds(_result.Practice.P95LatencyMilliseconds)</p>
+                <p><strong>Downstream calls:</strong> @_result.Practice.DownstreamCallCount.ToString("N0")</p>
+            </article>
+
+            <article class="challenge-card challenge-card-good">
+                <h3>@_result.Refactored.Label</h3>
+                <p><strong>Success:</strong> @FormatPercent(_result.Refactored.SuccessRatePercent)</p>
+                <p><strong>Tail latency (p95):</strong> @FormatMilliseconds(_result.Refactored.P95LatencyMilliseconds)</p>
+                <p><strong>Downstream calls:</strong> @_result.Refactored.DownstreamCallCount.ToString("N0")</p>
+            </article>
+        </div>
+
+        <div class="challenge-summary mt-3">
+            <p class="mb-1">
+                <strong>Success improvement:</strong> @FormatSuccessImprovement(_result)
+            </p>
+            <p class="mb-1">
+                <strong>Tail latency improvement:</strong> @FormatTailLatencyImprovement(_result)
+            </p>
+            <p class="mb-0">
+                <strong>Downstream call reduction:</strong> @FormatCallReduction(_result)
+            </p>
+        </div>
+
+        <h3 class="mt-4">Detailed Metrics</h3>
+        <table class="table table-sm table-striped cache-metrics-table">
+            <thead>
+                <tr>
+                    <th>Implementation</th>
+                    <th>Successful requests</th>
+                    <th>Total requests</th>
+                    <th>Success rate</th>
+                    <th>p95 latency</th>
+                    <th>Downstream calls</th>
+                    <th>Total elapsed</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in GetRows(_result))
+                {
+                    <tr>
+                        <td>@row.Label</td>
+                        <td>@row.SuccessfulRequests.ToString("N0")</td>
+                        <td>@row.TotalRequests.ToString("N0")</td>
+                        <td>@FormatPercent(row.SuccessRatePercent)</td>
+                        <td>@FormatMilliseconds(row.P95LatencyMilliseconds)</td>
+                        <td>@row.DownstreamCallCount.ToString("N0")</td>
+                        <td>@FormatMilliseconds(row.ElapsedMilliseconds)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
+
+@code {
+    private int _totalRequests = 1200;
+    private int _concurrentWorkers = 32;
+    private int _faultPercent = 35;
+    private int _slowPercent = 20;
+    private int _slowLatencyMs = 700;
+    private bool _isRunning;
+    private string? _error;
+    private ResiliencyRetryComparisonResult? _result;
+
+    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+
+    private async Task RunScenarioAsync()
+    {
+        _isRunning = true;
+        _error = null;
+
+        try
+        {
+            _result = await Runner.RunAsync(
+                _totalRequests,
+                _concurrentWorkers,
+                _faultPercent,
+                _slowPercent,
+                _slowLatencyMs);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _isRunning = false;
+        }
+    }
+
+    private static IEnumerable<ResiliencyScenarioResult> GetRows(ResiliencyRetryComparisonResult result)
+    {
+        yield return result.Bad;
+        yield return result.Practice;
+        yield return result.Refactored;
+    }
+
+    private static string FormatPercent(double value)
+    {
+        return $"{value:N1}%";
+    }
+
+    private static string FormatMilliseconds(double value)
+    {
+        return $"{value:N1} ms";
+    }
+
+    private static string FormatSuccessImprovement(ResiliencyRetryComparisonResult result)
+    {
+        var delta = result.Refactored.SuccessRatePercent - result.Bad.SuccessRatePercent;
+        return $"{delta:N1} percentage points";
+    }
+
+    private static string FormatTailLatencyImprovement(ResiliencyRetryComparisonResult result)
+    {
+        if (result.Refactored.P95LatencyMilliseconds <= 0.1)
+        {
+            return "n/a";
+        }
+
+        var improvement = result.Bad.P95LatencyMilliseconds / result.Refactored.P95LatencyMilliseconds;
+        return $"{improvement:N1}x lower p95 latency";
+    }
+
+    private static string FormatCallReduction(ResiliencyRetryComparisonResult result)
+    {
+        if (result.Bad.DownstreamCallCount <= 0)
+        {
+            return "n/a";
+        }
+
+        var reduction = 100 -
+                        (result.Refactored.DownstreamCallCount * 100.0 / result.Bad.DownstreamCallCount);
+        return $"{reduction:N1}% fewer downstream calls";
+    }
+}
