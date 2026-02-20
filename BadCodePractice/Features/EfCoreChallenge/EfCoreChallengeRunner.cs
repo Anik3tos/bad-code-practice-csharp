@@ -8,9 +8,10 @@ public sealed class EfCoreChallengeRunner(IServiceScopeFactory serviceScopeFacto
     public async Task<ChallengeComparisonResult> RunAsync(string city, CancellationToken cancellationToken = default)
     {
         var bad = await RunScenarioAsync<BadOrderReportService>(city, cancellationToken);
+        var practice = await RunScenarioAsync<PracticeOrderReportService>(city, cancellationToken);
         var refactored = await RunScenarioAsync<RefactoredOrderReportService>(city, cancellationToken);
 
-        return new ChallengeComparisonResult(city, bad, refactored);
+        return new ChallengeComparisonResult(city, bad, practice, refactored);
     }
 
     private async Task<ScenarioRunResult> RunScenarioAsync<TService>(
@@ -39,6 +40,7 @@ public sealed class EfCoreChallengeRunner(IServiceScopeFactory serviceScopeFacto
 public sealed record ChallengeComparisonResult(
     string City,
     ScenarioRunResult Bad,
+    ScenarioRunResult Practice,
     ScenarioRunResult Refactored);
 
 public sealed record ScenarioRunResult(

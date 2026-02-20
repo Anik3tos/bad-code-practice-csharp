@@ -1,6 +1,7 @@
 using BadCodePractice.Components;
 using BadCodePractice.Data;
 using BadCodePractice.Features.EfCoreChallenge;
+using BadCodePractice.Features.MemoryLeakChallenge;
 using BadCodePractice.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,8 +39,13 @@ builder.Services.AddDbContext<ChallengeDbContext>((serviceProvider, options) =>
 });
 
 builder.Services.AddScoped<BadOrderReportService>();
+builder.Services.AddScoped<PracticeOrderReportService>();
 builder.Services.AddScoped<RefactoredOrderReportService>();
 builder.Services.AddScoped<EfCoreChallengeRunner>();
+builder.Services.AddScoped<BadMemoryLeakService>();
+builder.Services.AddScoped<PracticeMemoryLeakService>();
+builder.Services.AddScoped<RefactoredMemoryLeakService>();
+builder.Services.AddScoped<MemoryLeakChallengeRunner>();
 
 var app = builder.Build();
 

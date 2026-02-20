@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BadCodePractice.Features.EfCoreChallenge;
 
-public sealed class BadOrderReportService(ChallengeDbContext dbContext) : IOrderReportService
+public sealed class PracticeOrderReportService(ChallengeDbContext dbContext) : IOrderReportService
 {
-    public string Name => "Bad query (Original)";
+    public string Name => "Practice query";
 
     public async Task<List<OrderReportDto>> GetOrderReportAsync(
         string city,

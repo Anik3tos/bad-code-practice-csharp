@@ -107,9 +107,19 @@ h1:focus {
     border-color: #bde5c8;
 }
 
+.challenge-card-practice {
+    background-color: #fff9eb;
+    border-color: #f2d394;
+}
+
 .challenge-summary {
     padding: 0.85rem 1rem;
     border-left: 4px solid #1b6ec2;
     background-color: #f6fbff;
     border-radius: 0.25rem;
+}
+
+.memory-table th,
+.memory-table td {
+    vertical-align: middle;
 }

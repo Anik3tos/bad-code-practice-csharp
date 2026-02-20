@@ -10,7 +10,8 @@
 
 <p class="lead">
     Practice spotting and fixing query anti-patterns.
-    Start with <code>Features/EfCoreChallenge/BadOrderReportService.cs</code>, then refactor it until it behaves
+    Start with <code>Features/EfCoreChallenge/PracticeOrderReportService.cs</code>, which starts from the same
+    implementation as <code>Features/EfCoreChallenge/BadOrderReportService.cs</code>, then refactor it until it behaves
     like <code>Features/EfCoreChallenge/RefactoredOrderReportService.cs</code>.
 </p>
 
@@ -55,6 +56,13 @@
                 <p><strong>Rows:</strong> @_result.Bad.Rows</p>
                 <p><strong>SQL Commands:</strong> @_result.Bad.QueryCount</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-practice">
+                <h3>@_result.Practice.Label</h3>
+                <p><strong>Rows:</strong> @_result.Practice.Rows</p>
+                <p><strong>SQL Commands:</strong> @_result.Practice.QueryCount</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good">
@@ -107,7 +115,7 @@
     private string? _error;
     private ChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
 
     private async Task RunScenarioAsync()
     {
