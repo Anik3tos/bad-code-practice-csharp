@@ -5,7 +5,7 @@ Hands-on labs for learning to identify and fix .NET performance anti-patterns. E
 ## Features
 
 - **12 challenge labs** covering common .NET performance pitfalls
-- **Side-by-side comparison** of Bad, Practice, and Refactored implementations
+- **Side-by-side comparison** of Bad, Practice, and AI Refactored implementations
 - **Real-time metrics** to measure your improvements
 - **Interactive Blazor UI** for running challenges in browser
 
@@ -66,7 +66,7 @@ Each challenge follows a consistent pattern:
 1. Open the practice file for your chosen challenge
 2. Identify and fix the anti-patterns
 3. Run the challenge in the UI to see metrics
-4. Compare your results against Bad and Refactored baselines
+4. Compare your results against Bad and AI Refactored baselines
 
 ## Project Structure
 

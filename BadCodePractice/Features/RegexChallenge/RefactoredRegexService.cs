@@ -5,7 +5,7 @@ namespace BadCodePractice.Features.RegexChallenge;
 
 public partial class RefactoredRegexService : IRegexService
 {
-    public string Name => "Refactored Regex (Static regex, minimal allocations)";
+    public string Name => "AI Refactored Regex (Static regex, minimal allocations)";
 
     // FIX 1: Use source-generated regex (.NET 7+) - compiled once at build time
     [GeneratedRegex(@"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]", RegexOptions.Compiled)]

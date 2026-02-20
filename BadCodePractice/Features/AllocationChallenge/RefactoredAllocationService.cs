@@ -4,7 +4,7 @@ namespace BadCodePractice.Features.AllocationChallenge;
 
 public class RefactoredAllocationService : IAllocationService
 {
-    public string Name => "Refactored Allocations (StringBuilder, No Boxing)";
+    public string Name => "AI Refactored Allocations (StringBuilder, No Boxing)";
 
     public int ProcessData(int itemCount)
     {
@@ -37,7 +37,7 @@ public class RefactoredAllocationService : IAllocationService
     private int ExtractValue(int val, StringBuilder sb)
     {
         sb.Clear();
-        
+
         for (int i = 0; i < 5; i++)
         {
             // 5. StringBuilder appends without allocating new string objects on every step

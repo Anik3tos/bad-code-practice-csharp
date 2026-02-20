@@ -75,8 +75,10 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Query reduction:</strong> @FormatQueryReduction(_result)</p>
-            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
+            <p><strong>Practice query reduction:</strong> @FormatQueryReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice speedup:</strong> @FormatSpeedup(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored query reduction:</strong> @FormatQueryReduction(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored speedup:</strong> @FormatSpeedup(_result.Bad, _result.Refactored)</p>
         </div>
 
         <div class="challenge-table">
@@ -137,17 +139,17 @@
 
     private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
-    private static string FormatQueryReduction(ChallengeComparisonResult result)
+    private static string FormatQueryReduction(ScenarioRunResult baseline, ScenarioRunResult candidate)
     {
-        if (result.Bad.QueryCount == 0) return "n/a";
-        var reduction = 100 - (result.Refactored.QueryCount * 100.0 / result.Bad.QueryCount);
+        if (baseline.QueryCount == 0) return "n/a";
+        var reduction = 100 - (candidate.QueryCount * 100.0 / baseline.QueryCount);
         return $"{reduction:N1}% fewer queries";
     }
 
-    private static string FormatSpeedup(ChallengeComparisonResult result)
+    private static string FormatSpeedup(ScenarioRunResult baseline, ScenarioRunResult candidate)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
-        var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
+        if (candidate.ElapsedMilliseconds <= 0.1) return "n/a";
+        var speedup = baseline.ElapsedMilliseconds / candidate.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }
 }

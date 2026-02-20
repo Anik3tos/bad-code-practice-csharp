@@ -2,7 +2,7 @@ namespace BadCodePractice.Features.ResiliencyRetryChallenge;
 
 public sealed class RefactoredResiliencyRetryService : ResiliencyRetryServiceBase
 {
-    public override string Name => "Refactored retry strategy";
+    public override string Name => "AI Refactored retry strategy";
 
     private readonly SimpleCircuitBreaker _circuitBreaker = new(
         failureThreshold: 8,

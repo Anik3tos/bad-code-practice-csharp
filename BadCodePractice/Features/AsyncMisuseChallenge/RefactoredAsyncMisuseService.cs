@@ -2,7 +2,7 @@ namespace BadCodePractice.Features.AsyncMisuseChallenge;
 
 public class RefactoredAsyncMisuseService : IAsyncMisuseService
 {
-    public string Name => "Refactored async (Good)";
+    public string Name => "AI Refactored async (Good)";
 
     public async Task<int> ProcessItemsAsync(int count, CancellationToken cancellationToken = default)
     {

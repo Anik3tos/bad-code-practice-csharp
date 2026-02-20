@@ -4,7 +4,7 @@ namespace BadCodePractice.Features.SerializationChallenge;
 
 public sealed class RefactoredSerializationService : SerializationServiceBase
 {
-    public override string Name => "Refactored serialization strategy";
+    public override string Name => "AI Refactored serialization strategy";
 
     protected override async Task<int> ExecuteCoreAsync(
         IReadOnlyList<SerializationRichPayload> payloads,

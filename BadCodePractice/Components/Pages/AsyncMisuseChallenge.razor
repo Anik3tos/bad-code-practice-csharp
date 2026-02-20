@@ -79,7 +79,8 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
+            <p><strong>Practice speedup:</strong> @FormatSpeedup(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored speedup:</strong> @FormatSpeedup(_result.Bad, _result.Refactored)</p>
         </div>
     </section>
 }
@@ -113,10 +114,10 @@
 
     private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
-    private static string FormatSpeedup(AsyncChallengeComparisonResult result)
+    private static string FormatSpeedup(AsyncScenarioRunResult baseline, AsyncScenarioRunResult candidate)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
-        var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
+        if (candidate.ElapsedMilliseconds <= 0.1) return "n/a";
+        var speedup = baseline.ElapsedMilliseconds / candidate.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }
 }

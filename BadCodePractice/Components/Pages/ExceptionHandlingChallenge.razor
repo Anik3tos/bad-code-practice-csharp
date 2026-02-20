@@ -80,9 +80,12 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Failure rate improvement:</strong> @FormatFailureReduction(_result)</p>
-            <p><strong>Diagnosability improvement:</strong> @FormatDiagnosabilityImprovement(_result)</p>
-            <p><strong>Retry success improvement:</strong> @FormatRetryImprovement(_result)</p>
+            <p><strong>Practice failure rate improvement:</strong> @FormatFailureReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice diagnosability improvement:</strong> @FormatDiagnosabilityImprovement(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice retry success improvement:</strong> @FormatRetryImprovement(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored failure rate improvement:</strong> @FormatFailureReduction(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored diagnosability improvement:</strong> @FormatDiagnosabilityImprovement(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored retry success improvement:</strong> @FormatRetryImprovement(_result.Bad, _result.Refactored)</p>
         </div>
 
         <div class="challenge-table">
@@ -158,21 +161,21 @@
     private static string FormatPercent(double value) => $"{value:N1}%";
     private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
-    private static string FormatFailureReduction(ExceptionHandlingComparisonResult result)
+    private static string FormatFailureReduction(ExceptionHandlingScenarioResult baseline, ExceptionHandlingScenarioResult candidate)
     {
-        var delta = result.Bad.FailureRatePercent - result.Refactored.FailureRatePercent;
+        var delta = baseline.FailureRatePercent - candidate.FailureRatePercent;
         return $"{delta:N1} percentage points lower";
     }
 
-    private static string FormatDiagnosabilityImprovement(ExceptionHandlingComparisonResult result)
+    private static string FormatDiagnosabilityImprovement(ExceptionHandlingScenarioResult baseline, ExceptionHandlingScenarioResult candidate)
     {
-        var delta = result.Refactored.DiagnosabilityScorePercent - result.Bad.DiagnosabilityScorePercent;
+        var delta = candidate.DiagnosabilityScorePercent - baseline.DiagnosabilityScorePercent;
         return $"{delta:N1} percentage points";
     }
 
-    private static string FormatRetryImprovement(ExceptionHandlingComparisonResult result)
+    private static string FormatRetryImprovement(ExceptionHandlingScenarioResult baseline, ExceptionHandlingScenarioResult candidate)
     {
-        var delta = result.Refactored.MeanRetrySuccessPercent - result.Bad.MeanRetrySuccessPercent;
+        var delta = candidate.MeanRetrySuccessPercent - baseline.MeanRetrySuccessPercent;
         return $"{delta:N1} percentage points";
     }
 }

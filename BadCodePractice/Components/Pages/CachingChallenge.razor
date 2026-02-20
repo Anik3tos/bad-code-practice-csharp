@@ -79,9 +79,12 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Memory reduction:</strong> @FormatMemoryReduction(_result)</p>
-            <p><strong>Hit ratio improvement:</strong> @FormatHitRatioImprovement(_result)</p>
-            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
+            <p><strong>Practice memory reduction:</strong> @FormatMemoryReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice hit ratio improvement:</strong> @FormatHitRatioImprovement(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice speedup:</strong> @FormatSpeedup(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored memory reduction:</strong> @FormatMemoryReduction(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored hit ratio improvement:</strong> @FormatHitRatioImprovement(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored speedup:</strong> @FormatSpeedup(_result.Bad, _result.Refactored)</p>
         </div>
 
         <div class="challenge-table">
@@ -164,23 +167,23 @@
     private static string FormatMilliseconds(double ms) => $"{ms:N1} ms";
     private static string FormatPercent(double value) => $"{value:N1}%";
 
-    private static string FormatMemoryReduction(CachingComparisonResult result)
+    private static string FormatMemoryReduction(CachingRunResult baseline, CachingRunResult candidate)
     {
-        if (result.Bad.RetainedBytes <= 0) return "n/a";
-        var reduction = 100 - (result.Refactored.RetainedBytes * 100.0 / result.Bad.RetainedBytes);
+        if (baseline.RetainedBytes <= 0) return "n/a";
+        var reduction = 100 - (candidate.RetainedBytes * 100.0 / baseline.RetainedBytes);
         return $"{reduction:N1}% less memory";
     }
 
-    private static string FormatHitRatioImprovement(CachingComparisonResult result)
+    private static string FormatHitRatioImprovement(CachingRunResult baseline, CachingRunResult candidate)
     {
-        var delta = result.Refactored.HitRatioPercent - result.Bad.HitRatioPercent;
+        var delta = candidate.HitRatioPercent - baseline.HitRatioPercent;
         return $"{delta:N1} percentage points";
     }
 
-    private static string FormatSpeedup(CachingComparisonResult result)
+    private static string FormatSpeedup(CachingRunResult baseline, CachingRunResult candidate)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
-        var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
+        if (candidate.ElapsedMilliseconds <= 0.1) return "n/a";
+        var speedup = baseline.ElapsedMilliseconds / candidate.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }
 }

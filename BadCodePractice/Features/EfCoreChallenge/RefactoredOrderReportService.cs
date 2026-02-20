@@ -5,7 +5,7 @@ namespace BadCodePractice.Features.EfCoreChallenge;
 
 public sealed class RefactoredOrderReportService(ChallengeDbContext dbContext) : IOrderReportService
 {
-    public string Name => "Refactored query (Possible solution)";
+    public string Name => "AI Refactored query (Possible solution)";
 
     public Task<List<OrderReportDto>> GetOrderReportAsync(
         string city,

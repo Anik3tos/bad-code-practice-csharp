@@ -77,9 +77,12 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Allocation reduction:</strong> @FormatAllocationReduction(_result)</p>
-            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
-            <p><strong>Reflection miss reduction:</strong> @FormatMissReduction(_result)</p>
+            <p><strong>Practice allocation reduction:</strong> @FormatAllocationReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice speedup:</strong> @FormatSpeedup(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice reflection miss reduction:</strong> @FormatMissReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored allocation reduction:</strong> @FormatAllocationReduction(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored speedup:</strong> @FormatSpeedup(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored reflection miss reduction:</strong> @FormatMissReduction(_result.Bad, _result.Refactored)</p>
         </div>
 
         <div class="challenge-table">
@@ -156,24 +159,24 @@
 
     private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
-    private static string FormatAllocationReduction(SerializationComparisonResult result)
+    private static string FormatAllocationReduction(SerializationScenarioResult baseline, SerializationScenarioResult candidate)
     {
-        if (result.Bad.AllocatedBytes <= 0) return "n/a";
-        var reduction = 100 - result.Refactored.AllocatedBytes * 100.0 / result.Bad.AllocatedBytes;
+        if (baseline.AllocatedBytes <= 0) return "n/a";
+        var reduction = 100 - candidate.AllocatedBytes * 100.0 / baseline.AllocatedBytes;
         return $"{reduction:N1}% less memory";
     }
 
-    private static string FormatSpeedup(SerializationComparisonResult result)
+    private static string FormatSpeedup(SerializationScenarioResult baseline, SerializationScenarioResult candidate)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
-        var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
+        if (candidate.ElapsedMilliseconds <= 0.1) return "n/a";
+        var speedup = baseline.ElapsedMilliseconds / candidate.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }
 
-    private static string FormatMissReduction(SerializationComparisonResult result)
+    private static string FormatMissReduction(SerializationScenarioResult baseline, SerializationScenarioResult candidate)
     {
-        if (result.Bad.ReflectionCacheMisses <= 0) return "n/a";
-        var reduction = 100 - result.Refactored.ReflectionCacheMisses * 100.0 / result.Bad.ReflectionCacheMisses;
+        if (baseline.ReflectionCacheMisses <= 0) return "n/a";
+        var reduction = 100 - candidate.ReflectionCacheMisses * 100.0 / baseline.ReflectionCacheMisses;
         return $"{reduction:N1}% fewer misses";
     }
 }

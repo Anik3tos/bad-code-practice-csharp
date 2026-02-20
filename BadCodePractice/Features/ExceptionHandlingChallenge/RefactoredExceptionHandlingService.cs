@@ -2,7 +2,7 @@ namespace BadCodePractice.Features.ExceptionHandlingChallenge;
 
 public sealed class RefactoredExceptionHandlingService : ExceptionHandlingServiceBase
 {
-    public override string Name => "Refactored exception handling";
+    public override string Name => "AI Refactored exception handling";
 
     protected override async Task<ExceptionRequestOutcome> ExecuteRequestAsync(
         ExceptionHandlingOptions options,

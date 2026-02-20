@@ -4,7 +4,7 @@ namespace BadCodePractice.Features.LoggingChallenge;
 
 public class RefactoredLoggingService(ILogger<RefactoredLoggingService> logger) : ILoggingService
 {
-    public string Name => "Refactored Logging (Structured, Masked)";
+    public string Name => "AI Refactored Logging (Structured, Masked)";
 
     public async Task ProcessTransactionsAsync(IEnumerable<UserTransaction> transactions)
     {

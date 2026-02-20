@@ -2,8 +2,8 @@ namespace BadCodePractice.Features.ConcurrencyChallenge;
 
 public class RefactoredConcurrencyService : IConcurrencyService
 {
-    public string Name => "Refactored Concurrency (Thread-safe)";
-    
+    public string Name => "AI Refactored Concurrency (Thread-safe)";
+
     private int _sharedTotal;
 
     public async Task<int> ProcessItemsAsync(int count, CancellationToken cancellationToken = default)
@@ -17,7 +17,7 @@ public class RefactoredConcurrencyService : IConcurrencyService
         }
 
         await Task.WhenAll(tasks);
-        
+
         return _sharedTotal;
     }
 

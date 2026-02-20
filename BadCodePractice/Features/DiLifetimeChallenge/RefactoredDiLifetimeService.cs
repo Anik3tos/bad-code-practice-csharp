@@ -3,7 +3,7 @@ namespace BadCodePractice.Features.DiLifetimeChallenge;
 // This will be registered as a SINGLETON
 public class RefactoredDiLifetimeService : IDiLifetimeService
 {
-    public string Name => "Refactored DI Lifetime (Scope Factory)";
+    public string Name => "AI RefactoredDI Lifetime (Scope Factory)";
     
     private readonly IServiceScopeFactory _scopeFactory;
 

@@ -8,7 +8,7 @@ public sealed class RefactoredCachingChallengeService : ICachingChallengeService
     private const int MaxEntries = 100;
     private static readonly TimeSpan TimeToLive = TimeSpan.FromSeconds(8);
 
-    public string Name => "Refactored cache";
+    public string Name => "AI Refactored cache";
 
     private readonly ConcurrentDictionary<string, CacheEntry> _cache = new();
     private readonly ConcurrentDictionary<string, Task<byte[]>> _inflight = new();

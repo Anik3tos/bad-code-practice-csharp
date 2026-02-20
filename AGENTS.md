@@ -74,7 +74,7 @@ The `*ChallengeRunner.cs` orchestrates execution and collects metrics.
 
 1. **Never "fix" Bad* files** - they exist to demonstrate problems
 2. **Practice files are user-editable** - keep them as TODO stubs
-3. **Refactored files show best practices** - maintain high quality
+3. **AI Refactoredfiles show best practices** - maintain high quality
 4. **Metrics matter** - each challenge measures specific performance characteristics
 5. **Database**: Uses Postgres (Docker) by default, SQLite as fallback
 

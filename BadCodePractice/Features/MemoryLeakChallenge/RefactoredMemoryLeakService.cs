@@ -2,7 +2,7 @@ namespace BadCodePractice.Features.MemoryLeakChallenge;
 
 public sealed class RefactoredMemoryLeakService : IMemoryLeakService
 {
-    public string Name => "Refactored implementation";
+    public string Name => "AI Refactored implementation";
 
     public Task<MemoryLeakRunResult> RunAsync(
         int iterations,
@@ -73,7 +73,8 @@ public sealed class RefactoredMemoryLeakService : IMemoryLeakService
         {
             cancellationToken.ThrowIfCancellationRequested();
             var payload = new byte[payloadBytes];
-            using var timer = new Timer(static state => GC.KeepAlive(state), payload, Timeout.Infinite, Timeout.Infinite);
+            using var timer = new Timer(static state => GC.KeepAlive(state), payload, Timeout.Infinite,
+                Timeout.Infinite);
             await Task.Yield();
         }
     }

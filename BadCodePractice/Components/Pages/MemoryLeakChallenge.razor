@@ -76,8 +76,10 @@
         </div>
 
         <div class="challenge-summary">
-            <p><strong>Memory reduction:</strong> @FormatReduction(_result)</p>
-            <p><strong>Improvement ratio:</strong> @FormatImprovement(_result)</p>
+            <p><strong>Practice memory reduction:</strong> @FormatReduction(_result.Bad, _result.Practice)</p>
+            <p><strong>Practice improvement ratio:</strong> @FormatImprovement(_result.Bad, _result.Practice)</p>
+            <p><strong>AI refactored memory reduction:</strong> @FormatReduction(_result.Bad, _result.Refactored)</p>
+            <p><strong>AI refactored improvement ratio:</strong> @FormatImprovement(_result.Bad, _result.Refactored)</p>
         </div>
 
         <div class="challenge-table">
@@ -156,17 +158,17 @@
         return $"{bytes / (1024d * 1024d):N2} MB";
     }
 
-    private static string FormatReduction(MemoryLeakComparisonResult result)
+    private static string FormatReduction(MemoryLeakRunResult baseline, MemoryLeakRunResult candidate)
     {
-        if (result.Bad.TotalRetainedBytes <= 0) return "n/a";
-        var reduction = 100 - (result.Refactored.TotalRetainedBytes * 100.0 / result.Bad.TotalRetainedBytes);
+        if (baseline.TotalRetainedBytes <= 0) return "n/a";
+        var reduction = 100 - (candidate.TotalRetainedBytes * 100.0 / baseline.TotalRetainedBytes);
         return $"{reduction:N1}% less retained memory";
     }
 
-    private static string FormatImprovement(MemoryLeakComparisonResult result)
+    private static string FormatImprovement(MemoryLeakRunResult baseline, MemoryLeakRunResult candidate)
     {
-        if (result.Refactored.TotalRetainedBytes <= 0) return "n/a";
-        var ratio = result.Bad.TotalRetainedBytes / (double)result.Refactored.TotalRetainedBytes;
+        if (candidate.TotalRetainedBytes <= 0) return "n/a";
+        var ratio = baseline.TotalRetainedBytes / (double)candidate.TotalRetainedBytes;
         return $"{ratio:N1}x better memory profile";
     }
 }
