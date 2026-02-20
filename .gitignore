@@ -36,10 +36,17 @@ ScaffoldingReadMe.txt
 # NuGet Symbol Packages
 *.snupkg
 
+# IDE settings
+.idea/
+*.DotSettings.user
+
 # Others
 ~$*
 *~
 CodeCoverage/
+*.db
+*.db-shm
+*.db-wal
 
 # MSBuild Binary and Structured Log
 *.binlog
