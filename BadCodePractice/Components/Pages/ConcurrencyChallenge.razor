@@ -5,20 +5,21 @@
 
 <PageTitle>Concurrency Challenge</PageTitle>
 
-<h1>Concurrency Race Condition Lab</h1>
-
-<p class="lead">
-    Practice spotting and fixing shared mutable state issues in multi-threaded code.
-    Start with <code>Features/ConcurrencyChallenge/PracticeConcurrencyService.cs</code>, which starts from the same
-    implementation as <code>Features/ConcurrencyChallenge/BadConcurrencyService.cs</code>, then refactor it until it behaves
-    like <code>Features/ConcurrencyChallenge/RefactoredConcurrencyService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="🔀">Concurrency Challenge</h1>
+        <p class="lead">
+            Identify and fix race conditions caused by unsynchronized access to shared mutable state.
+            Start with <code>PracticeConcurrencyService.cs</code> and refactor until all operations complete correctly.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
         <label for="itemCount">Concurrent Operations</label>
         <select id="itemCount" class="form-select" @bind="_itemCount">
-            <option value="100">100 (May not always race)</option>
+            <option value="100">100 (May not race)</option>
             <option value="1000">1,000</option>
             <option value="10000">10,000 (Recommended)</option>
             <option value="50000">50,000</option>
@@ -28,12 +29,13 @@
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to find in the bad version:</p>
-        <ul class="mb-0">
-            <li>Shared mutable state updated concurrently without synchronization.</li>
-            <li>Lost updates where multiple threads read the same value before computing the next increment.</li>
-            <li>Nondeterministic final totals instead of the exact expected number.</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">Race condition patterns to fix</p>
+        <ul>
+            <li><strong>Lost updates:</strong> Multiple threads read-modify-write without synchronization, overwriting each other.</li>
+            <li><strong>Non-atomic operations:</strong> <code>count++</code> is not atomic—read, increment, write are separate steps.</li>
+            <li><strong>Incorrect locking:</strong> Locking on the wrong object or too narrow a scope.</li>
+            <li><strong>Missing memory barriers:</strong> Without volatile or locks, thread caches may not see updates.</li>
         </ul>
     </div>
 </section>
@@ -45,65 +47,47 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Result for @(_result.ExpectedCount.ToString("N0")) Operations</h2>
+    <section class="challenge-results">
+        <h2>Results for @_result.ExpectedCount.ToString("N0") Operations</h2>
 
         <div class="challenge-grid">
             <article class="challenge-card challenge-card-bad @(_result.Bad.IsCorrect ? "" : "border-danger")">
                 <h3>@_result.Bad.Label</h3>
-                <p>
-                    <strong>Expected:</strong> @(_result.Bad.ExpectedCount.ToString("N0"))
-                </p>
+                <p><strong>Expected:</strong> @_result.Bad.ExpectedCount.ToString("N0")</p>
                 <p>
                     <strong>Actual:</strong>
                     <span class="@(_result.Bad.IsCorrect ? "text-success" : "text-danger fw-bold")">
-                        @(_result.Bad.ActualCount.ToString("N0"))
+                        @_result.Bad.ActualCount.ToString("N0")
                     </span>
                 </p>
-                <p>
-                    <strong>Missed Updates:</strong> @(_result.Bad.Difference.ToString("N0"))
-                </p>
-                <p>
-                    <strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)
-                </p>
+                <p><strong>Missed updates:</strong> @_result.Bad.Difference.ToString("N0")</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-practice @(_result.Practice.IsCorrect ? "" : "border-danger")">
                 <h3>@_result.Practice.Label</h3>
-                <p>
-                    <strong>Expected:</strong> @(_result.Practice.ExpectedCount.ToString("N0"))
-                </p>
+                <p><strong>Expected:</strong> @_result.Practice.ExpectedCount.ToString("N0")</p>
                 <p>
                     <strong>Actual:</strong>
                     <span class="@(_result.Practice.IsCorrect ? "text-success" : "text-danger fw-bold")">
-                        @(_result.Practice.ActualCount.ToString("N0"))
+                        @_result.Practice.ActualCount.ToString("N0")
                     </span>
                 </p>
-                <p>
-                    <strong>Missed Updates:</strong> @(_result.Practice.Difference.ToString("N0"))
-                </p>
-                <p>
-                    <strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)
-                </p>
+                <p><strong>Missed updates:</strong> @_result.Practice.Difference.ToString("N0")</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good @(_result.Refactored.IsCorrect ? "border-success" : "")">
                 <h3>@_result.Refactored.Label</h3>
-                <p>
-                    <strong>Expected:</strong> @(_result.Refactored.ExpectedCount.ToString("N0"))
-                </p>
+                <p><strong>Expected:</strong> @_result.Refactored.ExpectedCount.ToString("N0")</p>
                 <p>
                     <strong>Actual:</strong>
                     <span class="@(_result.Refactored.IsCorrect ? "text-success fw-bold" : "text-danger")">
-                        @(_result.Refactored.ActualCount.ToString("N0"))
+                        @_result.Refactored.ActualCount.ToString("N0")
                     </span>
                 </p>
-                <p>
-                    <strong>Missed Updates:</strong> @(_result.Refactored.Difference.ToString("N0"))
-                </p>
-                <p>
-                    <strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)
-                </p>
+                <p><strong>Missed updates:</strong> @_result.Refactored.Difference.ToString("N0")</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
             </article>
         </div>
     </section>
@@ -115,7 +99,7 @@
     private string? _error;
     private ConcurrencyChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -136,9 +120,5 @@
         }
     }
 
-    private static string FormatMilliseconds(double value)
-    {
-        return $"{value:N1} ms";
-    }
-
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 }

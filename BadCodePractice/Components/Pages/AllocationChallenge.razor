@@ -3,16 +3,17 @@
 @using BadCodePractice.Features.AllocationChallenge
 @inject AllocationChallengeRunner Runner
 
-<PageTitle>Allocation & GC Challenge</PageTitle>
+<PageTitle>Allocation Challenge</PageTitle>
 
-<h1>Allocation & GC Lab</h1>
-
-<p class="lead">
-    Practice spotting and fixing heavy memory allocations in hot paths like string concatenation (`+=`), boxing, and unnecessary `LINQ`.
-    Start with <code>Features/AllocationChallenge/PracticeAllocationService.cs</code>, which starts from the same
-    implementation as <code>Features/AllocationChallenge/BadAllocationService.cs</code>, then refactor it until it behaves
-    like <code>Features/AllocationChallenge/RefactoredAllocationService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="♻️">Allocation & GC Challenge</h1>
+        <p class="lead">
+            Reduce memory allocations in hot paths to minimize garbage collection pressure and improve throughput.
+            Start with <code>PracticeAllocationService.cs</code> and refactor until it matches <code>RefactoredAllocationService.cs</code>.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
@@ -27,12 +28,13 @@
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to find in the bad version:</p>
-        <ul class="mb-0">
-            <li><strong>String Churn:</strong> Using <code>+=</code> in loops creates thousands of abandoned strings that trigger garbage collection.</li>
-            <li><strong>Boxing:</strong> Storing value types (like <code>int</code>) in untyped object collections allocates memory on the heap.</li>
-            <li><strong>LINQ in Hot Paths:</strong> <code>.Where</code> and <code>.Select</code> inside extreme hot paths create hidden enumerator and closure allocations.</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">Allocation anti-patterns to fix</p>
+        <ul>
+            <li><strong>String concatenation:</strong> Using <code>+=</code> in loops creates a new string on every iteration.</li>
+            <li><strong>Boxing:</strong> Storing value types in <code>object</code> or non-generic collections allocates on the heap.</li>
+            <li><strong>LINQ allocations:</strong> <code>.Where()</code> and <code>.Select()</code> create iterators and closure objects.</li>
+            <li><strong>Missing capacity:</strong> Collections without initial capacity resize and copy internally.</li>
         </ul>
     </div>
 </section>
@@ -44,49 +46,49 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Result for @(_result.ItemCount.ToString("N0")) Items</h2>
+    <section class="challenge-results">
+        <h2>Results for @_result.ItemCount.ToString("N0") Items</h2>
 
         <div class="challenge-grid">
             <article class="challenge-card challenge-card-bad @(_result.Bad.AllocatedMegabytes > 10 ? "border-danger" : "")">
                 <h3>@_result.Bad.Label</h3>
                 <p>
-                    <strong>Memory Allocated:</strong> 
+                    <strong>Memory allocated:</strong>
                     <span class="@(_result.Bad.AllocatedMegabytes > 10 ? "text-danger fw-bold" : "")">
-                        @(_result.Bad.AllocatedMegabytes.ToString("N1")) MB
+                        @_result.Bad.AllocatedMegabytes.ToString("N1") MB
                     </span>
                 </p>
-                <p><strong>Gen 0 Collections:</strong> @_result.Bad.Gen0Collections</p>
-                <p><strong>Gen 1 Collections:</strong> @_result.Bad.Gen1Collections</p>
-                <p><strong>Gen 2 Collections:</strong> @_result.Bad.Gen2Collections</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Bad.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Bad.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Bad.Gen2Collections</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-practice @(_result.Practice.AllocatedMegabytes > 10 ? "border-danger" : "")">
                 <h3>@_result.Practice.Label</h3>
                 <p>
-                    <strong>Memory Allocated:</strong> 
+                    <strong>Memory allocated:</strong>
                     <span class="@(_result.Practice.AllocatedMegabytes > 10 ? "text-danger fw-bold" : "")">
-                        @(_result.Practice.AllocatedMegabytes.ToString("N1")) MB
+                        @_result.Practice.AllocatedMegabytes.ToString("N1") MB
                     </span>
                 </p>
-                <p><strong>Gen 0 Collections:</strong> @_result.Practice.Gen0Collections</p>
-                <p><strong>Gen 1 Collections:</strong> @_result.Practice.Gen1Collections</p>
-                <p><strong>Gen 2 Collections:</strong> @_result.Practice.Gen2Collections</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Practice.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Practice.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Practice.Gen2Collections</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good @(_result.Refactored.AllocatedMegabytes < 1 ? "border-success" : "")">
                 <h3>@_result.Refactored.Label</h3>
                 <p>
-                    <strong>Memory Allocated:</strong> 
+                    <strong>Memory allocated:</strong>
                     <span class="@(_result.Refactored.AllocatedMegabytes < 1 ? "text-success fw-bold" : "")">
-                        @(_result.Refactored.AllocatedMegabytes.ToString("N1")) MB
+                        @_result.Refactored.AllocatedMegabytes.ToString("N1") MB
                     </span>
                 </p>
-                <p><strong>Gen 0 Collections:</strong> @_result.Refactored.Gen0Collections</p>
-                <p><strong>Gen 1 Collections:</strong> @_result.Refactored.Gen1Collections</p>
-                <p><strong>Gen 2 Collections:</strong> @_result.Refactored.Gen2Collections</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Refactored.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Refactored.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Refactored.Gen2Collections</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
             </article>
         </div>
@@ -99,7 +101,7 @@
     private string? _error;
     private AllocationChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -120,8 +122,5 @@
         }
     }
 
-    private static string FormatMilliseconds(double value)
-    {
-        return $"{value:N1} ms";
-    }
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 }

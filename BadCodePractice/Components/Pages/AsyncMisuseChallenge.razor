@@ -5,34 +5,36 @@
 
 <PageTitle>Async Misuse Challenge</PageTitle>
 
-<h1>Async Misuse Challenge</h1>
-
-<p class="lead">
-    Practice spotting and fixing async anti-patterns.
-    Start with <code>Features/AsyncMisuseChallenge/PracticeAsyncMisuseService.cs</code>, which starts from the same
-    implementation as <code>Features/AsyncMisuseChallenge/BadAsyncMisuseService.cs</code>, then refactor it until it behaves
-    like <code>Features/AsyncMisuseChallenge/RefactoredAsyncMisuseService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="⏱️">Async Misuse Challenge</h1>
+        <p class="lead">
+            Fix async anti-patterns that cause thread pool starvation, deadlocks, and unresponsive applications.
+            Start with <code>PracticeAsyncMisuseService.cs</code> and refactor until it matches <code>RefactoredAsyncMisuseService.cs</code>.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
         <label for="itemCount">Items to Process</label>
         <select id="itemCount" class="form-select" @bind="_itemCount">
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
+            <option value="10">10 Items</option>
+            <option value="50">50 Items</option>
+            <option value="100">100 Items (Recommended)</option>
         </select>
         <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
             @_buttonText
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to find in the bad version:</p>
-        <ul class="mb-0">
-            <li>Sync over Async (<code>.Result</code> or <code>.Wait()</code>) causing thread pool starvation.</li>
-            <li>Fire-and-forget (<code>Task.Run</code> without await) hiding exceptions.</li>
-            <li>Missing <code>CancellationToken</code> preventing graceful cancellation.</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">Async anti-patterns to find and fix</p>
+        <ul>
+            <li><strong>Sync-over-async:</strong> Using <code>.Result</code> or <code>.Wait()</code> blocks threads and can cause deadlocks.</li>
+            <li><strong>Fire-and-forget:</strong> <code>async void</code> or unawaited Tasks hide exceptions and crash apps.</li>
+            <li><strong>Missing cancellation:</strong> No <code>CancellationToken</code> means operations can't be gracefully stopped.</li>
+            <li><strong>Thread pool starvation:</strong> Blocking calls exhaust available threads, queuing new work.</li>
         </ul>
     </div>
 </section>
@@ -44,53 +46,51 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Result for @(_result.ItemCount) Items</h2>
+    <section class="challenge-results">
+        <h2>Results for @_result.ItemCount Items</h2>
 
         <div class="challenge-grid">
             <article class="challenge-card challenge-card-bad">
                 <h3>@_result.Bad.Label</h3>
                 <p><strong>Processed:</strong> @_result.Bad.ProcessedCount</p>
+                <p><strong>Worker threads before:</strong> @_result.Bad.WorkerThreadsBefore</p>
+                <p><strong>Worker threads after:</strong> @_result.Bad.WorkerThreadsAfter</p>
+                <p><strong>Threads consumed:</strong> @_result.Bad.ThreadsUsed</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
-                <p><strong>Worker Threads Before:</strong> @_result.Bad.WorkerThreadsBefore</p>
-                <p><strong>Worker Threads After:</strong> @_result.Bad.WorkerThreadsAfter</p>
-                <p><strong>Threads Used (approx.):</strong> @_result.Bad.ThreadsUsed</p>
             </article>
 
             <article class="challenge-card challenge-card-practice">
                 <h3>@_result.Practice.Label</h3>
                 <p><strong>Processed:</strong> @_result.Practice.ProcessedCount</p>
+                <p><strong>Worker threads before:</strong> @_result.Practice.WorkerThreadsBefore</p>
+                <p><strong>Worker threads after:</strong> @_result.Practice.WorkerThreadsAfter</p>
+                <p><strong>Threads consumed:</strong> @_result.Practice.ThreadsUsed</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
-                <p><strong>Worker Threads Before:</strong> @_result.Practice.WorkerThreadsBefore</p>
-                <p><strong>Worker Threads After:</strong> @_result.Practice.WorkerThreadsAfter</p>
-                <p><strong>Threads Used (approx.):</strong> @_result.Practice.ThreadsUsed</p>
             </article>
 
             <article class="challenge-card challenge-card-good">
                 <h3>@_result.Refactored.Label</h3>
                 <p><strong>Processed:</strong> @_result.Refactored.ProcessedCount</p>
+                <p><strong>Worker threads before:</strong> @_result.Refactored.WorkerThreadsBefore</p>
+                <p><strong>Worker threads after:</strong> @_result.Refactored.WorkerThreadsAfter</p>
+                <p><strong>Threads consumed:</strong> @_result.Refactored.ThreadsUsed</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
-                <p><strong>Worker Threads Before:</strong> @_result.Refactored.WorkerThreadsBefore</p>
-                <p><strong>Worker Threads After:</strong> @_result.Refactored.WorkerThreadsAfter</p>
-                <p><strong>Threads Used (approx.):</strong> @_result.Refactored.ThreadsUsed</p>
             </article>
         </div>
 
-        <div class="challenge-summary mt-3">
-            <p class="mb-1">
-                <strong>Speedup:</strong> @FormatSpeedup(_result)
-            </p>
+        <div class="challenge-summary">
+            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
         </div>
     </section>
 }
 
 @code {
-    private int _itemCount = 10;
+    private int _itemCount = 100;
     private bool _isRunning;
     private string? _error;
     private AsyncChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -111,18 +111,11 @@
         }
     }
 
-    private static string FormatMilliseconds(double value)
-    {
-        return $"{value:N1} ms";
-    }
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
     private static string FormatSpeedup(AsyncChallengeComparisonResult result)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1)
-        {
-            return "n/a";
-        }
-
+        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
         var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }

@@ -1,41 +1,209 @@
 @page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Bad Code Practice</PageTitle>
 
-<h1>Bad Code Practice</h1>
+<section class="home-hero">
+    <h1>Bad Code Practice</h1>
+    <p class="lead">
+        Hands-on labs for identifying and fixing .NET performance anti-patterns.
+        Inspect bad implementations, refactor them, and measure the improvements.
+    </p>
+</section>
 
-<p>
-    Use this project as a hands-on lab: inspect intentionally bad implementations, refactor them, and verify
-    improvements with measured results.
-</p>
+<section class="home-challenges">
+    <div class="challenges-header">
+        <div>
+            <h2>Challenge Labs</h2>
+            <p class="text-muted">Each challenge presents intentionally flawed code. Your task: find the issues and fix them.</p>
+        </div>
+        <div class="challenges-count">
+            <span class="count-num">12</span>
+            <span class="count-label">Labs</span>
+        </div>
+    </div>
 
-<p>
-    Available challenge labs:
-</p>
+    <div class="challenge-grid">
+        <a href="/ef-core-challenge" class="home-card" data-category="data">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #e3f2fd; --icon-color: #1565c0;">⚡</div>
+                <h3>EF Core</h3>
+            </div>
+            <p class="card-desc">Fix N+1 queries, over-fetching, and in-memory filtering that cause excessive database round-trips.</p>
+            <div class="card-tags">
+                <span>N+1 Queries</span>
+                <span>Over-fetching</span>
+                <span>In-memory filtering</span>
+            </div>
+        </a>
 
-<ul>
-    <li>
-        <a href="/ef-core-challenge">EF Core Challenge</a>
-    </li>
-    <li>
-        <a href="/caching-challenge">Caching Challenge</a>
-    </li>
-    <li>
-        <a href="/memory-leak-challenge">Memory Leak Challenge</a>
-    </li>
-    <li>
-        <a href="/async-misuse-challenge">Async Misuse Challenge</a>
-    </li>
-    <li>
-        <a href="/concurrency-challenge">Concurrency Challenge</a>
-    </li>
-    <li>
-        <a href="/di-lifetime-challenge">DI Lifetime Challenge</a>
-    </li>
-    <li>
-        <a href="/allocation-challenge">Allocation Challenge</a>
-    </li>
-    <li>
-        <a href="/resiliency-retry-challenge">Resiliency/Retry Challenge</a>
-    </li>
-</ul>
+        <a href="/caching-challenge" class="home-card" data-category="data">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #fff3e0; --icon-color: #e65100;">💾</div>
+                <h3>Caching</h3>
+            </div>
+            <p class="card-desc">Address unbounded cache growth, missing TTL/eviction policies, and cache stampede on hot keys.</p>
+            <div class="card-tags">
+                <span>Memory growth</span>
+                <span>TTL policies</span>
+                <span>Cache stampede</span>
+            </div>
+        </a>
+
+        <a href="/memory-leak-challenge" class="home-card" data-category="memory">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #fce4ec; --icon-color: #c2185b;">🧠</div>
+                <h3>Memory Leak</h3>
+            </div>
+            <p class="card-desc">Identify and fix memory leaks caused by static references, event subscriptions, timers, and closure captures.</p>
+            <div class="card-tags">
+                <span>Static refs</span>
+                <span>Event leaks</span>
+                <span>Timers</span>
+            </div>
+        </a>
+
+        <a href="/async-misuse-challenge" class="home-card" data-category="async">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #e8f5e9; --icon-color: #2e7d32;">⏱️</div>
+                <h3>Async Misuse</h3>
+            </div>
+            <p class="card-desc">Correct async anti-patterns including sync-over-async blocking, fire-and-forget, and missing cancellation tokens.</p>
+            <div class="card-tags">
+                <span>Sync-over-async</span>
+                <span>Fire-and-forget</span>
+                <span>Cancellation</span>
+            </div>
+        </a>
+
+        <a href="/concurrency-challenge" class="home-card" data-category="async">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #f3e5f5; --icon-color: #7b1fa2;">🔀</div>
+                <h3>Concurrency</h3>
+            </div>
+            <p class="card-desc">Resolve race conditions and shared mutable state issues that lead to lost updates and data corruption.</p>
+            <div class="card-tags">
+                <span>Race conditions</span>
+                <span>Shared state</span>
+                <span>Thread safety</span>
+            </div>
+        </a>
+
+        <a href="/di-lifetime-challenge" class="home-card" data-category="arch">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #e0f7fa; --icon-color: #00838f;">📦</div>
+                <h3>DI Lifetime</h3>
+            </div>
+            <p class="card-desc">Fix dependency injection mistakes: captive dependencies, scope leakage, and disposable lifetime issues.</p>
+            <div class="card-tags">
+                <span>Captive deps</span>
+                <span>Scope leaks</span>
+                <span>Disposables</span>
+            </div>
+        </a>
+
+        <a href="/allocation-challenge" class="home-card" data-category="memory">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #fff8e1; --icon-color: #f9a825;">♻️</div>
+                <h3>Allocation</h3>
+            </div>
+            <p class="card-desc">Reduce excessive allocations from boxing, string concatenation, and large object heap pressure.</p>
+            <div class="card-tags">
+                <span>Boxing</span>
+                <span>String concat</span>
+                <span>LOH pressure</span>
+            </div>
+        </a>
+
+        <a href="/resiliency-retry-challenge" class="home-card" data-category="resilience">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #e8eaf6; --icon-color: #303f9f;">🛡️</div>
+                <h3>Resiliency/Retry</h3>
+            </div>
+            <p class="card-desc">Implement proper retry logic with backoff strategies to avoid retry storms and cascading failures.</p>
+            <div class="card-tags">
+                <span>Retry storms</span>
+                <span>Backoff</span>
+                <span>Circuit breaker</span>
+            </div>
+        </a>
+
+        <a href="/exception-handling-challenge" class="home-card" data-category="resilience">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #ffebee; --icon-color: #c62828;">🚨</div>
+                <h3>Exception Handling</h3>
+            </div>
+            <p class="card-desc">Improve reliability by removing swallowed exceptions, preserving stack traces, and adding structured context.</p>
+            <div class="card-tags">
+                <span>Failure rate</span>
+                <span>Diagnosability</span>
+                <span>Retry success</span>
+            </div>
+        </a>
+
+        <a href="/serialization-challenge" class="home-card" data-category="data">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #ede7f6; --icon-color: #4527a0;">🧾</div>
+                <h3>Serialization</h3>
+            </div>
+            <p class="card-desc">Fix reflection-heavy hot paths, synchronous JSON operations, missing source generators, and oversized payloads.</p>
+            <div class="card-tags">
+                <span>Allocations</span>
+                <span>Serialization time</span>
+                <span>Reflection misses</span>
+            </div>
+        </a>
+
+        <a href="/logging-challenge" class="home-card" data-category="observability">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #e0f2f1; --icon-color: #00695c;">📝</div>
+                <h3>Logging</h3>
+            </div>
+            <p class="card-desc">Fix poor observability by removing PII leakage, eliminating noise, and ensuring consistent correlation IDs.</p>
+            <div class="card-tags">
+                <span>PII Leakage</span>
+                <span>Correlation IDs</span>
+                <span>Structured Logging</span>
+            </div>
+        </a>
+
+        <a href="/regex-challenge" class="home-card" data-category="data">
+            <div class="card-header">
+                <div class="card-icon" style="--icon-bg: #f3e5f5; --icon-color: #512da8;">🔍</div>
+                <h3>Regex</h3>
+            </div>
+            <p class="card-desc">Fix inline regex compilation, excessive substring allocations, and leverage source generators for parsing.</p>
+            <div class="card-tags">
+                <span>Inline Regex</span>
+                <span>Substring allocs</span>
+                <span>Source generators</span>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section class="home-howto">
+    <h2>How It Works</h2>
+    <div class="howto-steps">
+        <div class="howto-step">
+            <div class="howto-num">1</div>
+            <div class="howto-content">
+                <h4>Pick a Challenge</h4>
+                <p>Each lab focuses on specific performance anti-patterns with measurable metrics.</p>
+            </div>
+        </div>
+        <div class="howto-step">
+            <div class="howto-num">2</div>
+            <div class="howto-content">
+                <h4>Open the Practice File</h4>
+                <p>Navigate to <code>Features/&lt;Challenge&gt;/Practice*Service.cs</code> to start refactoring.</p>
+            </div>
+        </div>
+        <div class="howto-step">
+            <div class="howto-num">3</div>
+            <div class="howto-content">
+                <h4>Run & Compare</h4>
+                <p>Execute the challenge and see your results against the bad and refactored baselines.</p>
+            </div>
+        </div>
+    </div>
+</section>

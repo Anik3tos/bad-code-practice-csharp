@@ -1,0 +1,178 @@
+@page "/exception-handling-challenge"
+@rendermode InteractiveServer
+@using BadCodePractice.Features.ExceptionHandlingChallenge
+@inject ExceptionHandlingChallengeRunner Runner
+
+<PageTitle>Exception Handling Challenge</PageTitle>
+
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="🚨">Exception Handling Challenge</h1>
+        <p class="lead">
+            Fix exception handling practices that hide errors, lose context, and make debugging impossible.
+            Start with <code>PracticeExceptionHandlingService.cs</code> and refactor until it matches <code>RefactoredExceptionHandlingService.cs</code>.
+        </p>
+    </div>
+</header>
+
+<section class="challenge-panel">
+    <div class="challenge-controls">
+        <label for="totalRequests">Total requests</label>
+        <input id="totalRequests" type="number" class="form-control" min="100" max="5000" @bind="_totalRequests" />
+
+        <label for="concurrency" class="mt-3">Concurrent workers</label>
+        <input id="concurrency" type="number" class="form-control" min="4" max="128" @bind="_concurrentWorkers" />
+
+        <label for="transientFaultPercent" class="mt-3">Transient faults (%)</label>
+        <input id="transientFaultPercent" type="number" class="form-control" min="0" max="95" @bind="_transientFaultPercent" />
+
+        <label for="permanentFaultPercent" class="mt-3">Permanent faults (%)</label>
+        <input id="permanentFaultPercent" type="number" class="form-control" min="0" max="40" @bind="_permanentFaultPercent" />
+
+        <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
+            @_buttonText
+        </button>
+    </div>
+
+    <div class="challenge-info">
+        <p class="challenge-info-title">Exception handling anti-patterns to fix</p>
+        <ul>
+            <li><strong>Swallowed exceptions:</strong> Empty catch blocks hide errors completely.</li>
+            <li><strong>throw ex:</strong> Resets the stack trace, losing the original error location.</li>
+            <li><strong>Missing context:</strong> Exceptions without correlation IDs or request context are untraceable.</li>
+            <li><strong>Over-catching:</strong> Catching <code>Exception</code> when only specific types should be handled.</li>
+            <li><strong>No retry logic:</strong> Transient errors fail immediately instead of being retried.</li>
+        </ul>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger mt-3" role="alert">@_error</div>
+}
+
+@if (_result is not null)
+{
+    <section class="challenge-results">
+        <h2>Results</h2>
+
+        <div class="challenge-grid">
+            <article class="challenge-card challenge-card-bad">
+                <h3>@_result.Bad.Label</h3>
+                <p><strong>Failure rate:</strong> @FormatPercent(_result.Bad.FailureRatePercent)</p>
+                <p><strong>Diagnosability:</strong> @FormatPercent(_result.Bad.DiagnosabilityScorePercent)</p>
+                <p><strong>Retry success:</strong> @FormatPercent(_result.Bad.MeanRetrySuccessPercent)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-practice">
+                <h3>@_result.Practice.Label</h3>
+                <p><strong>Failure rate:</strong> @FormatPercent(_result.Practice.FailureRatePercent)</p>
+                <p><strong>Diagnosability:</strong> @FormatPercent(_result.Practice.DiagnosabilityScorePercent)</p>
+                <p><strong>Retry success:</strong> @FormatPercent(_result.Practice.MeanRetrySuccessPercent)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-good">
+                <h3>@_result.Refactored.Label</h3>
+                <p><strong>Failure rate:</strong> @FormatPercent(_result.Refactored.FailureRatePercent)</p>
+                <p><strong>Diagnosability:</strong> @FormatPercent(_result.Refactored.DiagnosabilityScorePercent)</p>
+                <p><strong>Retry success:</strong> @FormatPercent(_result.Refactored.MeanRetrySuccessPercent)</p>
+            </article>
+        </div>
+
+        <div class="challenge-summary">
+            <p><strong>Failure rate improvement:</strong> @FormatFailureReduction(_result)</p>
+            <p><strong>Diagnosability improvement:</strong> @FormatDiagnosabilityImprovement(_result)</p>
+            <p><strong>Retry success improvement:</strong> @FormatRetryImprovement(_result)</p>
+        </div>
+
+        <div class="challenge-table">
+            <h3>Detailed Metrics</h3>
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Implementation</th>
+                        <th>Failed</th>
+                        <th>Total</th>
+                        <th>Failure rate</th>
+                        <th>Diagnosability</th>
+                        <th>Retry success</th>
+                        <th>Elapsed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in GetRows(_result))
+                    {
+                        <tr>
+                            <td>@row.Label</td>
+                            <td>@row.FailedRequests.ToString("N0")</td>
+                            <td>@row.TotalRequests.ToString("N0")</td>
+                            <td>@FormatPercent(row.FailureRatePercent)</td>
+                            <td>@FormatPercent(row.DiagnosabilityScorePercent)</td>
+                            <td>@FormatPercent(row.MeanRetrySuccessPercent)</td>
+                            <td>@FormatMilliseconds(row.ElapsedMilliseconds)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@code {
+    private int _totalRequests = 1200;
+    private int _concurrentWorkers = 32;
+    private int _transientFaultPercent = 35;
+    private int _permanentFaultPercent = 10;
+    private bool _isRunning;
+    private string? _error;
+    private ExceptionHandlingComparisonResult? _result;
+
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
+
+    private async Task RunScenarioAsync()
+    {
+        _isRunning = true;
+        _error = null;
+
+        try
+        {
+            _result = await Runner.RunAsync(_totalRequests, _concurrentWorkers, _transientFaultPercent, _permanentFaultPercent);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _isRunning = false;
+        }
+    }
+
+    private static IEnumerable<ExceptionHandlingScenarioResult> GetRows(ExceptionHandlingComparisonResult result)
+    {
+        yield return result.Bad;
+        yield return result.Practice;
+        yield return result.Refactored;
+    }
+
+    private static string FormatPercent(double value) => $"{value:N1}%";
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
+
+    private static string FormatFailureReduction(ExceptionHandlingComparisonResult result)
+    {
+        var delta = result.Bad.FailureRatePercent - result.Refactored.FailureRatePercent;
+        return $"{delta:N1} percentage points lower";
+    }
+
+    private static string FormatDiagnosabilityImprovement(ExceptionHandlingComparisonResult result)
+    {
+        var delta = result.Refactored.DiagnosabilityScorePercent - result.Bad.DiagnosabilityScorePercent;
+        return $"{delta:N1} percentage points";
+    }
+
+    private static string FormatRetryImprovement(ExceptionHandlingComparisonResult result)
+    {
+        var delta = result.Refactored.MeanRetrySuccessPercent - result.Bad.MeanRetrySuccessPercent;
+        return $"{delta:N1} percentage points";
+    }
+}

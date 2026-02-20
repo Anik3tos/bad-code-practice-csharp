@@ -5,12 +5,15 @@
 
 <PageTitle>Caching Challenge</PageTitle>
 
-<h1>Caching Challenge</h1>
-
-<p class="lead">
-    Start with <code>Features/CachingChallenge/PracticeCachingChallengeService.cs</code>.
-    It starts with the same bad logic as <code>BadCachingChallengeService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="💾">Caching Challenge</h1>
+        <p class="lead">
+            Fix caching anti-patterns that lead to memory exhaustion, poor hit rates, and thundering herd problems.
+            Start with <code>PracticeCachingChallengeService.cs</code> and refactor until it matches <code>RefactoredCachingChallengeService.cs</code>.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
@@ -20,10 +23,10 @@
         <label for="workers" class="mt-3">Concurrent workers</label>
         <input id="workers" type="number" class="form-control" min="4" max="128" @bind="_concurrentWorkers" />
 
-        <label for="keyspace" class="mt-3">Key space</label>
+        <label for="keyspace" class="mt-3">Key space size</label>
         <input id="keyspace" type="number" class="form-control" min="5" max="500" @bind="_keySpace" />
 
-        <label for="payload" class="mt-3">Payload (KB per entry)</label>
+        <label for="payload" class="mt-3">Payload size (KB)</label>
         <input id="payload" type="number" class="form-control" min="4" max="256" @bind="_payloadKilobytes" />
 
         <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
@@ -31,12 +34,13 @@
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to fix in the cache implementation:</p>
-        <ul class="mb-0">
-            <li>Unbounded cache growth</li>
-            <li>No TTL or eviction policy</li>
-            <li>Cache stampede on hot keys</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">Anti-patterns to find and fix</p>
+        <ul>
+            <li><strong>Unbounded growth:</strong> Cache grows indefinitely without eviction, consuming all memory.</li>
+            <li><strong>Missing TTL:</strong> No expiration policy means stale data and memory leaks.</li>
+            <li><strong>Cache stampede:</strong> Multiple concurrent misses hit the backend simultaneously for the same key.</li>
+            <li><strong>No size limits:</strong> Individual entries can be arbitrarily large without constraints.</li>
         </ul>
     </div>
 </section>
@@ -48,74 +52,68 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Results</h2>
+    <section class="challenge-results">
+        <h2>Results</h2>
 
         <div class="challenge-grid">
             <article class="challenge-card challenge-card-bad">
                 <h3>@_result.Bad.Label</h3>
-                <p><strong>Retained memory:</strong> @FormatBytes(_result.Bad.RetainedBytes)</p>
+                <p><strong>Memory retained:</strong> @FormatBytes(_result.Bad.RetainedBytes)</p>
                 <p><strong>Hit ratio:</strong> @FormatPercent(_result.Bad.HitRatioPercent)</p>
                 <p><strong>Response time:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-practice">
                 <h3>@_result.Practice.Label</h3>
-                <p><strong>Retained memory:</strong> @FormatBytes(_result.Practice.RetainedBytes)</p>
+                <p><strong>Memory retained:</strong> @FormatBytes(_result.Practice.RetainedBytes)</p>
                 <p><strong>Hit ratio:</strong> @FormatPercent(_result.Practice.HitRatioPercent)</p>
                 <p><strong>Response time:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good">
                 <h3>@_result.Refactored.Label</h3>
-                <p><strong>Retained memory:</strong> @FormatBytes(_result.Refactored.RetainedBytes)</p>
+                <p><strong>Memory retained:</strong> @FormatBytes(_result.Refactored.RetainedBytes)</p>
                 <p><strong>Hit ratio:</strong> @FormatPercent(_result.Refactored.HitRatioPercent)</p>
                 <p><strong>Response time:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
             </article>
         </div>
 
-        <div class="challenge-summary mt-3">
-            <p class="mb-1">
-                <strong>Memory retained reduction:</strong> @FormatMemoryReduction(_result)
-            </p>
-            <p class="mb-1">
-                <strong>Hit ratio improvement:</strong> @FormatHitRatioImprovement(_result)
-            </p>
-            <p class="mb-0">
-                <strong>Response time speedup:</strong> @FormatSpeedup(_result)
-            </p>
+        <div class="challenge-summary">
+            <p><strong>Memory reduction:</strong> @FormatMemoryReduction(_result)</p>
+            <p><strong>Hit ratio improvement:</strong> @FormatHitRatioImprovement(_result)</p>
+            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
         </div>
 
-        <h3 class="mt-4">Detailed Metrics</h3>
-        <table class="table table-sm table-striped cache-metrics-table">
-            <thead>
-                <tr>
-                    <th>Implementation</th>
-                    <th>Hits</th>
-                    <th>Misses</th>
-                    <th>Backend calls</th>
-                    <th>Cache entries</th>
-                    <th>Retained memory</th>
-                    <th>Hit ratio</th>
-                    <th>Total response time</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in GetRows(_result))
-                {
+        <div class="challenge-table">
+            <h3>Detailed Metrics</h3>
+            <table class="table table-sm table-striped">
+                <thead>
                     <tr>
-                        <td>@row.Label</td>
-                        <td>@row.Hits</td>
-                        <td>@row.Misses</td>
-                        <td>@row.BackendCalls</td>
-                        <td>@row.CacheEntries</td>
-                        <td>@FormatBytes(row.RetainedBytes)</td>
-                        <td>@FormatPercent(row.HitRatioPercent)</td>
-                        <td>@FormatMilliseconds(row.ElapsedMilliseconds)</td>
+                        <th>Implementation</th>
+                        <th>Hits</th>
+                        <th>Misses</th>
+                        <th>Backend calls</th>
+                        <th>Cache entries</th>
+                        <th>Memory</th>
+                        <th>Hit ratio</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var row in GetRows(_result))
+                    {
+                        <tr>
+                            <td>@row.Label</td>
+                            <td>@row.Hits</td>
+                            <td>@row.Misses</td>
+                            <td>@row.BackendCalls</td>
+                            <td>@row.CacheEntries</td>
+                            <td>@FormatBytes(row.RetainedBytes)</td>
+                            <td>@FormatPercent(row.HitRatioPercent)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
 }
 
@@ -128,7 +126,7 @@
     private string? _error;
     private CachingComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Cache Comparison";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -158,38 +156,19 @@
 
     private static string FormatBytes(long bytes)
     {
-        if (bytes < 1024)
-        {
-            return $"{bytes:N0} B";
-        }
-
-        if (bytes < 1024 * 1024)
-        {
-            return $"{bytes / 1024d:N1} KB";
-        }
-
+        if (bytes < 1024) return $"{bytes:N0} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024d:N1} KB";
         return $"{bytes / (1024d * 1024d):N2} MB";
     }
 
-    private static string FormatMilliseconds(double milliseconds)
-    {
-        return $"{milliseconds:N1} ms";
-    }
-
-    private static string FormatPercent(double value)
-    {
-        return $"{value:N1}%";
-    }
+    private static string FormatMilliseconds(double ms) => $"{ms:N1} ms";
+    private static string FormatPercent(double value) => $"{value:N1}%";
 
     private static string FormatMemoryReduction(CachingComparisonResult result)
     {
-        if (result.Bad.RetainedBytes <= 0)
-        {
-            return "n/a";
-        }
-
+        if (result.Bad.RetainedBytes <= 0) return "n/a";
         var reduction = 100 - (result.Refactored.RetainedBytes * 100.0 / result.Bad.RetainedBytes);
-        return $"{reduction:N1}% less retained memory";
+        return $"{reduction:N1}% less memory";
     }
 
     private static string FormatHitRatioImprovement(CachingComparisonResult result)
@@ -200,11 +179,7 @@
 
     private static string FormatSpeedup(CachingComparisonResult result)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1)
-        {
-            return "n/a";
-        }
-
+        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
         var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }

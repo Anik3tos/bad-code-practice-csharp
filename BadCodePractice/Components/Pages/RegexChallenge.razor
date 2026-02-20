@@ -1,0 +1,150 @@
+@page "/regex-challenge"
+@rendermode InteractiveServer
+@using BadCodePractice.Features.RegexChallenge
+@inject RegexChallengeRunner Runner
+
+<PageTitle>Regex Challenge</PageTitle>
+
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="🔍">Regex & Parsing Challenge</h1>
+        <p class="lead">
+            Optimize regex and string parsing operations that cause excessive allocations and CPU overhead in hot paths.
+            Start with <code>PracticeRegexService.cs</code> and refactor until it matches <code>RefactoredRegexService.cs</code>.
+        </p>
+    </div>
+</header>
+
+<section class="challenge-panel">
+    <div class="challenge-controls">
+        <label for="lineCount">Log Lines to Parse</label>
+        <select id="lineCount" class="form-select" @bind="_lineCount">
+            <option value="5000">5,000 Lines</option>
+            <option value="10000">10,000 Lines (Recommended)</option>
+            <option value="50000">50,000 Lines</option>
+            <option value="100000">100,000 Lines</option>
+        </select>
+        <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
+            @_buttonText
+        </button>
+    </div>
+
+    <div class="challenge-info">
+        <p class="challenge-info-title">Regex and parsing anti-patterns to fix</p>
+        <ul>
+            <li><strong>Inline compilation:</strong> <code>new Regex(...)</code> inside a loop compiles the pattern every iteration.</li>
+            <li><strong>Substring allocations:</strong> Multiple <code>Substring()</code> calls create intermediate strings.</li>
+            <li><strong>Missing source generators:</strong> Not using <code>[GeneratedRegex]</code> for compile-time regex (.NET 7+).</li>
+            <li><strong>String concatenation:</strong> <code>"" + value</code> instead of direct null checks or assignments.</li>
+            <li><strong>Span opportunities:</strong> Using string when <code>ReadOnlySpan&lt;char&gt;</code> would avoid allocations.</li>
+        </ul>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger mt-3" role="alert">@_error</div>
+}
+
+@if (_result is not null)
+{
+    <section class="challenge-results">
+        <h2>Results for @_result.LineCount.ToString("N0") Lines</h2>
+
+        <div class="challenge-grid">
+            <article class="challenge-card challenge-card-bad @(_result.Bad.AllocatedMegabytes > 5 ? "border-danger" : "")">
+                <h3>@_result.Bad.Label</h3>
+                <p>
+                    <strong>Memory allocated:</strong>
+                    <span class="@(_result.Bad.AllocatedMegabytes > 5 ? "text-danger fw-bold" : "")">
+                        @_result.Bad.AllocatedMegabytes.ToString("N1") MB
+                    </span>
+                </p>
+                <p><strong>Lines parsed:</strong> @_result.Bad.ParsedCount.ToString("N0")</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Bad.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Bad.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Bad.Gen2Collections</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-practice @(_result.Practice.AllocatedMegabytes > 5 ? "border-danger" : "")">
+                <h3>@_result.Practice.Label</h3>
+                <p>
+                    <strong>Memory allocated:</strong>
+                    <span class="@(_result.Practice.AllocatedMegabytes > 5 ? "text-danger fw-bold" : "")">
+                        @_result.Practice.AllocatedMegabytes.ToString("N1") MB
+                    </span>
+                </p>
+                <p><strong>Lines parsed:</strong> @_result.Practice.ParsedCount.ToString("N0")</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Practice.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Practice.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Practice.Gen2Collections</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-good @(_result.Refactored.AllocatedMegabytes < 2 ? "border-success" : "")">
+                <h3>@_result.Refactored.Label</h3>
+                <p>
+                    <strong>Memory allocated:</strong>
+                    <span class="@(_result.Refactored.AllocatedMegabytes < 2 ? "text-success fw-bold" : "")">
+                        @_result.Refactored.AllocatedMegabytes.ToString("N1") MB
+                    </span>
+                </p>
+                <p><strong>Lines parsed:</strong> @_result.Refactored.ParsedCount.ToString("N0")</p>
+                <p><strong>Gen 0 collections:</strong> @_result.Refactored.Gen0Collections</p>
+                <p><strong>Gen 1 collections:</strong> @_result.Refactored.Gen1Collections</p>
+                <p><strong>Gen 2 collections:</strong> @_result.Refactored.Gen2Collections</p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
+            </article>
+        </div>
+
+        <div class="challenge-summary">
+            <p><strong>Memory reduction:</strong> @FormatMemoryReduction(_result)</p>
+            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
+        </div>
+    </section>
+}
+
+@code {
+    private int _lineCount = 10000;
+    private bool _isRunning;
+    private string? _error;
+    private RegexChallengeComparisonResult? _result;
+
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
+
+    private async Task RunScenarioAsync()
+    {
+        _isRunning = true;
+        _error = null;
+
+        try
+        {
+            _result = await Runner.RunAsync(_lineCount);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _isRunning = false;
+        }
+    }
+
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
+
+    private static string FormatMemoryReduction(RegexChallengeComparisonResult result)
+    {
+        if (result.Bad.AllocatedMegabytes <= 0) return "n/a";
+        var reduction = 100 - (result.Refactored.AllocatedMegabytes * 100.0 / result.Bad.AllocatedMegabytes);
+        return $"{reduction:N1}% less memory";
+    }
+
+    private static string FormatSpeedup(RegexChallengeComparisonResult result)
+    {
+        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
+        var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
+        return $"{speedup:N1}x faster";
+    }
+}

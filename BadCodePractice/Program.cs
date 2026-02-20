@@ -8,6 +8,10 @@ using BadCodePractice.Features.ConcurrencyChallenge;
 using BadCodePractice.Features.DiLifetimeChallenge;
 using BadCodePractice.Features.AllocationChallenge;
 using BadCodePractice.Features.ResiliencyRetryChallenge;
+using BadCodePractice.Features.ExceptionHandlingChallenge;
+using BadCodePractice.Features.SerializationChallenge;
+using BadCodePractice.Features.LoggingChallenge;
+using BadCodePractice.Features.RegexChallenge;
 using BadCodePractice.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,6 +85,32 @@ builder.Services.AddScoped<BadResiliencyRetryService>();
 builder.Services.AddScoped<PracticeResiliencyRetryService>();
 builder.Services.AddScoped<RefactoredResiliencyRetryService>();
 builder.Services.AddScoped<ResiliencyRetryChallengeRunner>();
+builder.Services.AddScoped<BadExceptionHandlingService>();
+builder.Services.AddScoped<PracticeExceptionHandlingService>();
+builder.Services.AddScoped<RefactoredExceptionHandlingService>();
+builder.Services.AddScoped<ExceptionHandlingChallengeRunner>();
+builder.Services.AddScoped<BadSerializationService>();
+builder.Services.AddScoped<PracticeSerializationService>();
+builder.Services.AddScoped<RefactoredSerializationService>();
+builder.Services.AddScoped<SerializationChallengeRunner>();
+
+// Logging Challenge Services
+builder.Services.AddSingleton<InMemoryLoggerStore>();
+builder.Services.AddSingleton<ILoggerProvider, InMemoryLoggerProvider>();
+
+// Explicitly configure logging
+builder.Logging.AddFilter("BadCodePractice.Features.LoggingChallenge", LogLevel.Trace);
+
+builder.Services.AddScoped<BadLoggingService>();
+builder.Services.AddScoped<PracticeLoggingService>();
+builder.Services.AddScoped<RefactoredLoggingService>();
+builder.Services.AddScoped<LoggingChallengeRunner>();
+
+// Regex Challenge Services
+builder.Services.AddScoped<BadRegexService>();
+builder.Services.AddScoped<PracticeRegexService>();
+builder.Services.AddScoped<RefactoredRegexService>();
+builder.Services.AddScoped<RegexChallengeRunner>();
 
 // DI Lifetime Challenge Services
 builder.Services.AddScoped<IScopedState, ScopedState>();

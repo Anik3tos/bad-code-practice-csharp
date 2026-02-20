@@ -5,18 +5,19 @@
 
 <PageTitle>DI Lifetime Challenge</PageTitle>
 
-<h1>DI Lifetime & Captive Dependency Lab</h1>
-
-<p class="lead">
-    Practice spotting and fixing captive dependencies—when a `Singleton` service holds onto a `Scoped` or `Transient` referencing, causing state sharing bugs and disastrous GC memory leaks.
-    Start with <code>Features/DiLifetimeChallenge/PracticeDiLifetimeService.cs</code>, which starts from the same
-    implementation as <code>Features/DiLifetimeChallenge/BadDiLifetimeService.cs</code>, then refactor it until it behaves
-    like <code>Features/DiLifetimeChallenge/RefactoredDiLifetimeService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="📦">DI Lifetime Challenge</h1>
+        <p class="lead">
+            Fix dependency injection lifetime mismatches that cause state leakage, captive dependencies, and memory leaks.
+            Start with <code>PracticeDiLifetimeService.cs</code> and refactor until it matches <code>RefactoredDiLifetimeService.cs</code>.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
-        <label for="requestCount">Simulated Concurrent Requests</label>
+        <label for="requestCount">Simulated Requests</label>
         <select id="requestCount" class="form-select" @bind="_requestCount">
             <option value="10">10 Requests</option>
             <option value="100">100 Requests</option>
@@ -27,11 +28,13 @@
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to find in the bad version:</p>
-        <ul class="mb-0">
-            <li><strong>State Leak:</strong> A scoped state is injected into a singleton constructor, making it shared globally across all requests instead of per-request.</li>
-            <li><strong>Memory/Disposable Leak:</strong> Transient operations resolved from the root provider and cached in a list grow forever unconditionally.</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">DI anti-patterns to find and fix</p>
+        <ul>
+            <li><strong>Captive dependency:</strong> Singleton service holding a Scoped dependency—it never gets released.</li>
+            <li><strong>State leakage:</strong> Shared state across requests when each should have its own scope.</li>
+            <li><strong>Root provider resolution:</strong> Resolving scoped services from the root container, not a scope.</li>
+            <li><strong>Unbounded growth:</strong> Transient disposables cached in a singleton list without cleanup.</li>
         </ul>
     </div>
 </section>
@@ -43,13 +46,13 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Result for @(_result.TotalRequests.ToString("N0")) Requests</h2>
-        
+    <section class="challenge-results">
+        <h2>Results for @_result.TotalRequests.ToString("N0") Requests</h2>
+
         @if (_result.MemoryGrowthMb > 10)
         {
             <div class="alert alert-warning">
-                <strong>Memory Alert!</strong> Execution resulted in ~@(_result.MemoryGrowthMb.ToString("N1")) MB of growth.
+                <strong>Memory Alert:</strong> Execution resulted in ~@(_result.MemoryGrowthMb.ToString("N1")) MB of growth.
             </div>
         }
 
@@ -57,39 +60,39 @@
             <article class="challenge-card challenge-card-bad @(_result.Bad.StateLeaked ? "border-danger" : "")">
                 <h3>@_result.Bad.Label</h3>
                 <p>
-                    <strong>State Leaked:</strong> 
+                    <strong>State leaked:</strong>
                     <span class="@(_result.Bad.StateLeaked ? "text-danger fw-bold" : "text-success")">
                         @(_result.Bad.StateLeaked ? "Yes" : "No")
                     </span>
                 </p>
-                <p><strong>Unique Scopes Seen:</strong> @_result.Bad.UniqueScopesSeen / @_result.Bad.TotalRequests</p>
-                <p><strong>Max State Count:</strong> @_result.Bad.MaxCountSeen</p>
+                <p><strong>Unique scopes:</strong> @_result.Bad.UniqueScopesSeen / @_result.Bad.TotalRequests</p>
+                <p><strong>Max state count:</strong> @_result.Bad.MaxCountSeen</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-practice @(_result.Practice.StateLeaked ? "border-danger" : "")">
                 <h3>@_result.Practice.Label</h3>
                 <p>
-                    <strong>State Leaked:</strong> 
+                    <strong>State leaked:</strong>
                     <span class="@(_result.Practice.StateLeaked ? "text-danger fw-bold" : "text-success")">
                         @(_result.Practice.StateLeaked ? "Yes" : "No")
                     </span>
                 </p>
-                <p><strong>Unique Scopes Seen:</strong> @_result.Practice.UniqueScopesSeen / @_result.Practice.TotalRequests</p>
-                <p><strong>Max State Count:</strong> @_result.Practice.MaxCountSeen</p>
+                <p><strong>Unique scopes:</strong> @_result.Practice.UniqueScopesSeen / @_result.Practice.TotalRequests</p>
+                <p><strong>Max state count:</strong> @_result.Practice.MaxCountSeen</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good @(_result.Refactored.StateLeaked ? "" : "border-success")">
                 <h3>@_result.Refactored.Label</h3>
                 <p>
-                    <strong>State Leaked:</strong> 
+                    <strong>State leaked:</strong>
                     <span class="@(_result.Refactored.StateLeaked ? "text-danger" : "text-success fw-bold")">
                         @(_result.Refactored.StateLeaked ? "Yes" : "No")
                     </span>
                 </p>
-                <p><strong>Unique Scopes Seen:</strong> @_result.Refactored.UniqueScopesSeen / @_result.Refactored.TotalRequests</p>
-                <p><strong>Max State Count:</strong> @_result.Refactored.MaxCountSeen</p>
+                <p><strong>Unique scopes:</strong> @_result.Refactored.UniqueScopesSeen / @_result.Refactored.TotalRequests</p>
+                <p><strong>Max state count:</strong> @_result.Refactored.MaxCountSeen</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
             </article>
         </div>
@@ -102,7 +105,7 @@
     private string? _error;
     private DiChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -123,8 +126,5 @@
         }
     }
 
-    private static string FormatMilliseconds(double value)
-    {
-        return $"{value:N1} ms";
-    }
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 }

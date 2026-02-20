@@ -1,78 +1,28 @@
-# bad-code-practice
+# Bad Code Practice
 
-Practice project for finding bad code and refactoring it into cleaner, faster code.
+Hands-on labs for learning to identify and fix .NET performance anti-patterns. Each challenge presents intentionally flawed code with measurable metrics—your task is to refactor it and see real improvements.
 
-## Included challenge labs
+## Features
 
-### EF Core challenge
-- Practice file: `BadCodePractice/Features/EfCoreChallenge/PracticeOrderReportService.cs`
-- Route: `/ef-core-challenge`
-- Focus: over-fetching, in-memory filtering, N+1 queries
-- Metrics: SQL command count, elapsed time, output rows
+- **12 challenge labs** covering common .NET performance pitfalls
+- **Side-by-side comparison** of Bad, Practice, and Refactored implementations
+- **Real-time metrics** to measure your improvements
+- **Interactive Blazor UI** for running challenges in browser
 
-### Caching challenge
-- Practice file: `BadCodePractice/Features/CachingChallenge/PracticeCachingChallengeService.cs`
-- Route: `/caching-challenge`
-- Focus: unbounded cache growth, missing TTL/eviction, cache stampede
-- Metrics: memory retained, hit ratio, response time
-
-### Memory leak challenge
-- Practice file: `BadCodePractice/Features/MemoryLeakChallenge/PracticeMemoryLeakService.cs`
-- Route: `/memory-leak-challenge`
-- Focus: static references, event subscriptions, timers, unbounded collections, closure capture
-- Metrics: retained memory by cause and total retained memory
-
-### Async misuse challenge
-- Practice file: `BadCodePractice/Features/AsyncMisuseChallenge/PracticeAsyncMisuseService.cs`
-- Route: `/async-misuse-challenge`
-- Focus: sync-over-async, fire-and-forget, missing cancellation
-- Metrics: elapsed time, processed count, approximate worker thread usage
-
-### Concurrency challenge
-- Practice file: `BadCodePractice/Features/ConcurrencyChallenge/PracticeConcurrencyService.cs`
-- Route: `/concurrency-challenge`
-- Focus: race conditions and shared mutable state
-- Metrics: expected vs actual count, missed updates, elapsed time
-
-### DI lifetime challenge
-- Practice file: `BadCodePractice/Features/DiLifetimeChallenge/PracticeDiLifetimeService.cs`
-- Route: `/di-lifetime-challenge`
-- Focus: captive dependencies, scope/state leakage, disposable lifetime mistakes
-- Metrics: unique scopes seen, leak indicator, memory growth, elapsed time
-
-### Allocation challenge
-- Practice file: `BadCodePractice/Features/AllocationChallenge/PracticeAllocationService.cs`
-- Route: `/allocation-challenge`
-- Focus: heavy allocations in hot paths, boxing, string churn, LINQ overhead
-- Metrics: memory allocated (MB), Gen 0/1/2 collection counts, elapsed time
-
-### Resiliency/Retry challenge
-- Practice file: `BadCodePractice/Features/ResiliencyRetryChallenge/PracticeResiliencyRetryService.cs`
-- Route: `/resiliency-retry-challenge`
-- Focus: blind retries, missing timeout/jitter/backoff, no circuit breaker
-- Metrics: success under fault injection, p95 tail latency, downstream call count
-
-## Run with Docker DB (Postgres)
-
-From repo root:
+## Quick Start
 
 ```bash
+# Start database (Postgres)
 docker compose up -d
-```
 
-This starts Postgres on `localhost:5433`.
-
-Then run the app:
-
-```bash
+# Run the app
 cd BadCodePractice
-dotnet restore
 dotnet run
 ```
 
-Open any challenge route from the list above using the local URL printed by `dotnet run`.
+Open the displayed localhost URL and navigate to any challenge.
 
-## Optional: run with SQLite instead of Docker
+### Alternative: SQLite (no Docker)
 
 ```bash
 cd BadCodePractice
@@ -80,8 +30,70 @@ $env:Database__Provider="sqlite"
 dotnet run
 ```
 
-## If app port is already in use
+### Port already in use?
 
 ```bash
 dotnet run --urls "http://localhost:5101"
 ```
+
+## Challenge Labs
+
+| Challenge | Focus Areas | Route |
+|-----------|-------------|-------|
+| **EF Core** | N+1 queries, over-fetching, in-memory filtering | `/ef-core-challenge` |
+| **Caching** | Unbounded growth, missing TTL, cache stampede | `/caching-challenge` |
+| **Memory Leak** | Static refs, event subscriptions, timers, closures | `/memory-leak-challenge` |
+| **Async Misuse** | Sync-over-async, fire-and-forget, missing cancellation | `/async-misuse-challenge` |
+| **Concurrency** | Race conditions, shared mutable state | `/concurrency-challenge` |
+| **DI Lifetime** | Captive dependencies, scope leakage, disposable mistakes | `/di-lifetime-challenge` |
+| **Allocation** | Boxing, string churn, LINQ overhead, LOH pressure | `/allocation-challenge` |
+| **Resiliency/Retry** | Blind retries, missing backoff/jitter, no circuit breaker | `/resiliency-retry-challenge` |
+| **Exception Handling** | Swallowed exceptions, `throw ex`, missing context/correlation | `/exception-handling-challenge` |
+| **Serialization** | Reflection hot paths, sync JSON, missing source generators, over-serialization | `/serialization-challenge` |
+| **Logging** | PII leakage, noisy strings, missing correlation IDs | `/logging-challenge` |
+| **Regex** | Inline compilation, substring allocations, missing source generators | `/regex-challenge` |
+
+## How Challenges Work
+
+Each challenge follows a consistent pattern:
+
+| File | Purpose |
+|------|---------|
+| `Bad*Service.cs` | Intentionally bad implementation—**don't modify** |
+| `Practice*Service.cs` | Your workspace—implement fixes here |
+| `Refactored*Service.cs` | Reference solution for comparison |
+
+1. Open the practice file for your chosen challenge
+2. Identify and fix the anti-patterns
+3. Run the challenge in the UI to see metrics
+4. Compare your results against Bad and Refactored baselines
+
+## Project Structure
+
+```
+BadCodePractice/
+├── Components/Pages/       # Blazor pages (one per challenge)
+├── Features/               # Challenge implementations
+│   └── <ChallengeName>/
+│       ├── I<Name>Service.cs           # Interface
+│       ├── Bad<Name>Service.cs         # Anti-patterns
+│       ├── Practice<Name>Service.cs    # Your workspace
+│       ├── Refactored<Name>Service.cs  # Solution
+│       └── <Name>ChallengeRunner.cs    # Orchestrator
+├── Data/                   # EF Core entities, DbContext, seeding
+└── Infrastructure/         # Query metrics, interceptors
+```
+
+## Requirements
+
+- .NET 10 SDK
+- Docker (optional, for Postgres)
+- PostgreSQL on port 5433 (or use SQLite)
+
+## For AI Agents
+
+See [AGENTS.md](./AGENTS.md) for guidelines on working with this codebase programmatically.
+
+## License
+
+MIT

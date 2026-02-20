@@ -1,0 +1,142 @@
+@page "/logging-challenge"
+@rendermode InteractiveServer
+@using BadCodePractice.Features.LoggingChallenge
+@inject LoggingChallengeRunner Runner
+
+<PageTitle>Logging Challenge</PageTitle>
+
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="📝">Logging & Observability Challenge</h1>
+        <p class="lead">
+            Fix logging practices that leak sensitive data, create noise, and make production debugging impossible.
+            Start with <code>PracticeLoggingService.cs</code> and refactor until it matches <code>RefactoredLoggingService.cs</code>.
+        </p>
+    </div>
+</header>
+
+<section class="challenge-panel">
+    <div class="challenge-controls">
+        <label for="requestCount">Transactions to Process</label>
+        <select id="requestCount" class="form-select" @bind="_requestCount">
+            <option value="10">10 Transactions</option>
+            <option value="100">100 Transactions</option>
+            <option value="500">500 Transactions</option>
+        </select>
+        <button class="btn btn-primary mt-3" @onclick="RunScenarioAsync" disabled="@_isRunning">
+            @_buttonText
+        </button>
+    </div>
+
+    <div class="challenge-info">
+        <p class="challenge-info-title">Logging anti-patterns to fix</p>
+        <ul>
+            <li><strong>PII leakage:</strong> Logging sensitive data like credit cards, passwords, or personal info.</li>
+            <li><strong>String interpolation:</strong> <code>$"User {id}"</code> allocates even when the log level is disabled.</li>
+            <li><strong>Missing correlation:</strong> No request ID makes it impossible to trace operations across services.</li>
+            <li><strong>Noise:</strong> Using <code>LogInformation</code> for debug data clutters production logs.</li>
+            <li><strong>Missing structure:</strong> Plain text logs can't be queried or aggregated effectively.</li>
+        </ul>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger mt-3" role="alert">@_error</div>
+}
+
+@if (_result is not null)
+{
+    <section class="challenge-results">
+        <h2>Results for @_result.TotalRequests.ToString("N0") Transactions</h2>
+
+        <div class="challenge-grid">
+            <article class="challenge-card challenge-card-bad @(_result.Bad.PiiExposures > 0 ? "border-danger" : "")">
+                <h3>@_result.Bad.Label</h3>
+                <p>
+                    <strong>PII exposures:</strong>
+                    <span class="@(_result.Bad.PiiExposures > 0 ? "text-danger fw-bold" : "text-success")">
+                        @_result.Bad.PiiExposures
+                    </span>
+                </p>
+                <p><strong>Total logs:</strong> @_result.Bad.TotalLogs</p>
+                <p><strong>Chars per request:</strong> @_result.Bad.CharsPerRequest</p>
+                <p>
+                    <strong>Trace coverage:</strong>
+                    <span class="@(_result.Bad.TraceCoveragePercentage < 100 ? "text-danger" : "text-success")">
+                        @_result.Bad.TraceCoveragePercentage.ToString("N0")%
+                    </span>
+                </p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-practice @(_result.Practice.PiiExposures > 0 ? "border-danger" : "")">
+                <h3>@_result.Practice.Label</h3>
+                <p>
+                    <strong>PII exposures:</strong>
+                    <span class="@(_result.Practice.PiiExposures > 0 ? "text-danger fw-bold" : "text-success")">
+                        @_result.Practice.PiiExposures
+                    </span>
+                </p>
+                <p><strong>Total logs:</strong> @_result.Practice.TotalLogs</p>
+                <p><strong>Chars per request:</strong> @_result.Practice.CharsPerRequest</p>
+                <p>
+                    <strong>Trace coverage:</strong>
+                    <span class="@(_result.Practice.TraceCoveragePercentage < 100 ? "text-danger" : "text-success")">
+                        @_result.Practice.TraceCoveragePercentage.ToString("N0")%
+                    </span>
+                </p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
+            </article>
+
+            <article class="challenge-card challenge-card-good @(_result.Refactored.PiiExposures == 0 ? "border-success" : "")">
+                <h3>@_result.Refactored.Label</h3>
+                <p>
+                    <strong>PII exposures:</strong>
+                    <span class="@(_result.Refactored.PiiExposures == 0 ? "text-success fw-bold" : "text-danger")">
+                        @_result.Refactored.PiiExposures
+                    </span>
+                </p>
+                <p><strong>Total logs:</strong> @_result.Refactored.TotalLogs</p>
+                <p><strong>Chars per request:</strong> @_result.Refactored.CharsPerRequest</p>
+                <p>
+                    <strong>Trace coverage:</strong>
+                    <span class="@(_result.Refactored.TraceCoveragePercentage == 100 ? "text-success fw-bold" : "text-danger")">
+                        @_result.Refactored.TraceCoveragePercentage.ToString("N0")%
+                    </span>
+                </p>
+                <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
+            </article>
+        </div>
+    </section>
+}
+
+@code {
+    private int _requestCount = 100;
+    private bool _isRunning;
+    private string? _error;
+    private LoggingChallengeComparisonResult? _result;
+
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
+
+    private async Task RunScenarioAsync()
+    {
+        _isRunning = true;
+        _error = null;
+
+        try
+        {
+            _result = await Runner.RunAsync(_requestCount);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _isRunning = false;
+        }
+    }
+
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
+}

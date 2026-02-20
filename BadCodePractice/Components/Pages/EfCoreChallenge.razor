@@ -6,18 +6,19 @@
 
 <PageTitle>EF Core Challenge</PageTitle>
 
-<h1>EF Core Bad Code Lab</h1>
-
-<p class="lead">
-    Practice spotting and fixing query anti-patterns.
-    Start with <code>Features/EfCoreChallenge/PracticeOrderReportService.cs</code>, which starts from the same
-    implementation as <code>Features/EfCoreChallenge/BadOrderReportService.cs</code>, then refactor it until it behaves
-    like <code>Features/EfCoreChallenge/RefactoredOrderReportService.cs</code>.
-</p>
+<header class="challenge-header">
+    <div class="challenge-header-content">
+        <h1 data-icon="⚡">EF Core Challenge</h1>
+        <p class="lead">
+            Fix database query anti-patterns that cause excessive round-trips, memory bloat, and slow response times.
+            Start with <code>PracticeOrderReportService.cs</code> and refactor until it matches <code>RefactoredOrderReportService.cs</code>.
+        </p>
+    </div>
+</header>
 
 <section class="challenge-panel">
     <div class="challenge-controls">
-        <label for="city">City</label>
+        <label for="city">Filter by City</label>
         <select id="city" class="form-select" @bind="_city">
             @foreach (var city in ChallengeSeeder.Cities)
             {
@@ -29,13 +30,13 @@
         </button>
     </div>
 
-    <div class="challenge-smells">
-        <p class="mb-1 fw-semibold">What to find in the bad version:</p>
-        <ul class="mb-0">
-            <li>Loads far more rows than needed</li>
-            <li>Filters in memory instead of SQL</li>
-            <li>N+1 queries for shipments</li>
-            <li>No <code>AsNoTracking()</code> for read-only query</li>
+    <div class="challenge-info">
+        <p class="challenge-info-title">Anti-patterns to find and fix</p>
+        <ul>
+            <li><strong>Over-fetching:</strong> Loading entire entities when only a few columns are needed.</li>
+            <li><strong>In-memory filtering:</strong> Pulling all rows then filtering with LINQ instead of SQL WHERE.</li>
+            <li><strong>N+1 queries:</strong> Lazy-loading related data in a loop, causing one query per parent row.</li>
+            <li><strong>Missing AsNoTracking:</strong> Change tracking overhead on read-only queries.</li>
         </ul>
     </div>
 </section>
@@ -47,65 +48,63 @@
 
 @if (_result is not null)
 {
-    <section class="mt-4">
-        <h2>Run Result for @(_result.City)</h2>
+    <section class="challenge-results">
+        <h2>Results for @_result.City</h2>
 
         <div class="challenge-grid">
             <article class="challenge-card challenge-card-bad">
                 <h3>@_result.Bad.Label</h3>
-                <p><strong>Rows:</strong> @_result.Bad.Rows</p>
-                <p><strong>SQL Commands:</strong> @_result.Bad.QueryCount</p>
+                <p><strong>Rows loaded:</strong> @_result.Bad.Rows</p>
+                <p><strong>SQL commands:</strong> @_result.Bad.QueryCount</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Bad.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-practice">
                 <h3>@_result.Practice.Label</h3>
-                <p><strong>Rows:</strong> @_result.Practice.Rows</p>
-                <p><strong>SQL Commands:</strong> @_result.Practice.QueryCount</p>
+                <p><strong>Rows loaded:</strong> @_result.Practice.Rows</p>
+                <p><strong>SQL commands:</strong> @_result.Practice.QueryCount</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Practice.ElapsedMilliseconds)</p>
             </article>
 
             <article class="challenge-card challenge-card-good">
                 <h3>@_result.Refactored.Label</h3>
-                <p><strong>Rows:</strong> @_result.Refactored.Rows</p>
-                <p><strong>SQL Commands:</strong> @_result.Refactored.QueryCount</p>
+                <p><strong>Rows loaded:</strong> @_result.Refactored.Rows</p>
+                <p><strong>SQL commands:</strong> @_result.Refactored.QueryCount</p>
                 <p><strong>Elapsed:</strong> @FormatMilliseconds(_result.Refactored.ElapsedMilliseconds)</p>
             </article>
         </div>
 
-        <div class="challenge-summary mt-3">
-            <p class="mb-1">
-                <strong>Query reduction:</strong> @FormatQueryReduction(_result)
-            </p>
-            <p class="mb-0">
-                <strong>Speedup:</strong> @FormatSpeedup(_result)
-            </p>
+        <div class="challenge-summary">
+            <p><strong>Query reduction:</strong> @FormatQueryReduction(_result)</p>
+            <p><strong>Speedup:</strong> @FormatSpeedup(_result)</p>
         </div>
 
-        <h3 class="mt-4">Top 5 Orders (Refactored)</h3>
-        <table class="table table-sm table-striped">
-            <thead>
-                <tr>
-                    <th>Order Id</th>
-                    <th>Customer</th>
-                    <th>City</th>
-                    <th>Total</th>
-                    <th>Shipped</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in _result.Refactored.TopRows)
-                {
+        <div class="challenge-table">
+            <h3>Top 5 Orders (Refactored)</h3>
+            <table class="table table-sm table-striped">
+                <thead>
                     <tr>
-                        <td>@row.OrderId</td>
-                        <td>@row.Customer</td>
-                        <td>@row.City</td>
-                        <td>@row.Total.ToString("C")</td>
-                        <td>@(row.Shipped?.ToString("yyyy-MM-dd") ?? "Pending")</td>
+                        <th>Order Id</th>
+                        <th>Customer</th>
+                        <th>City</th>
+                        <th>Total</th>
+                        <th>Shipped</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var row in _result.Refactored.TopRows)
+                    {
+                        <tr>
+                            <td>@row.OrderId</td>
+                            <td>@row.Customer</td>
+                            <td>@row.City</td>
+                            <td>@row.Total.ToString("C")</td>
+                            <td>@(row.Shipped?.ToString("yyyy-MM-dd") ?? "Pending")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
 }
 
@@ -115,7 +114,7 @@
     private string? _error;
     private ChallengeComparisonResult? _result;
 
-    private string _buttonText => _isRunning ? "Running..." : "Run Bad vs Practice vs Refactored";
+    private string _buttonText => _isRunning ? "Running..." : "Run Comparison";
 
     private async Task RunScenarioAsync()
     {
@@ -136,29 +135,18 @@
         }
     }
 
-    private static string FormatMilliseconds(double value)
-    {
-        return $"{value:N1} ms";
-    }
+    private static string FormatMilliseconds(double value) => $"{value:N1} ms";
 
     private static string FormatQueryReduction(ChallengeComparisonResult result)
     {
-        if (result.Bad.QueryCount == 0)
-        {
-            return "n/a";
-        }
-
+        if (result.Bad.QueryCount == 0) return "n/a";
         var reduction = 100 - (result.Refactored.QueryCount * 100.0 / result.Bad.QueryCount);
-        return $"{reduction:N1}% fewer SQL commands";
+        return $"{reduction:N1}% fewer queries";
     }
 
     private static string FormatSpeedup(ChallengeComparisonResult result)
     {
-        if (result.Refactored.ElapsedMilliseconds <= 0.1)
-        {
-            return "n/a";
-        }
-
+        if (result.Refactored.ElapsedMilliseconds <= 0.1) return "n/a";
         var speedup = result.Bad.ElapsedMilliseconds / result.Refactored.ElapsedMilliseconds;
         return $"{speedup:N1}x faster";
     }
